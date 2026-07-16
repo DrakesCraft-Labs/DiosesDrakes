@@ -188,6 +188,35 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    public void unlockSkill(UUID playerId, GodId god, String skillId, Instant unlockedAt) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    INSERT OR IGNORE INTO divine_skills (player_uuid, god_id, skill_id, unlocked_at)
+                    VALUES (?, ?, ?, ?)
+                    """)) {
+                statement.setString(1, playerId.toString());
+                statement.setString(2, god.name());
+                statement.setString(3, skillId);
+                statement.setLong(4, unlockedAt.toEpochMilli());
+                statement.executeUpdate();
+            }
+        }
+    }
+
+    public boolean hasUnlockedSkill(UUID playerId, String skillId) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    SELECT 1 FROM divine_skills WHERE player_uuid = ? AND skill_id = ?
+                    """)) {
+                statement.setString(1, playerId.toString());
+                statement.setString(2, skillId);
+                try (ResultSet result = statement.executeQuery()) {
+                    return result.next();
+                }
+            }
+        }
+    }
+
     private void initialize() throws SQLException {
         synchronized (lock) {
             try (Statement statement = connection.createStatement()) {

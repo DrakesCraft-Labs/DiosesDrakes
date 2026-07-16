@@ -29,6 +29,8 @@ class DivineRepositoryTest {
             assertTrue(created.activeGodOptional().isEmpty());
 
             repository.selectGod(playerId, GodId.HEPHAESTUS, now, now.plusSeconds(604800));
+            repository.unlockSkill(playerId, GodId.HEPHAESTUS, "hephaestus.forja_viva", now);
+            assertTrue(repository.hasUnlockedSkill(playerId, "hephaestus.forja_viva"));
             DivineProfile selected = repository.find(playerId).orElseThrow();
             assertEquals(GodId.HEPHAESTUS, selected.activeGod());
 

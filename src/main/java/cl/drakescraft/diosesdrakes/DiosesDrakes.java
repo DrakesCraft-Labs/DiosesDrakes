@@ -2,9 +2,12 @@ package cl.drakescraft.diosesdrakes;
 
 import cl.drakescraft.diosesdrakes.command.DiosesCommand;
 import cl.drakescraft.diosesdrakes.menu.PantheonMenuListener;
+import cl.drakescraft.diosesdrakes.listener.HephaestusListener;
 import cl.drakescraft.diosesdrakes.service.DivineAuditLogger;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
+import cl.drakescraft.diosesdrakes.service.LoadoutService;
+import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.VaultEconomyGateway;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import net.milkbowl.vault.economy.Economy;
@@ -19,6 +22,7 @@ import java.time.Duration;
 public final class DiosesDrakes extends JavaPlugin {
     private DivineRepository repository;
     private ProfileService profiles;
+    private SkillService skills;
     private DivineTransactionService transactions;
 
     @Override
@@ -29,7 +33,7 @@ public final class DiosesDrakes extends JavaPlugin {
             return;
         }
 
-        DiosesCommand command = new DiosesCommand(profiles);
+        DiosesCommand command = new DiosesCommand(profiles, skills);
         PluginCommand dioses = getCommand("dioses");
         if (dioses == null) {
             getLogger().severe("No se pudo registrar el comando /dioses.");
@@ -40,6 +44,7 @@ public final class DiosesDrakes extends JavaPlugin {
         dioses.setExecutor(command);
         dioses.setTabCompleter(command);
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles), this);
+        getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
         getLogger().info("DiosesDrakes core 0.1.0 habilitado.");
     }
 
@@ -72,6 +77,7 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofHours(getConfig().getLong("renunciation.cooldown-hours", 48)),
                     Duration.ofDays(7)
             );
+            skills = new SkillService(repository, profiles, new LoadoutService(repository));
         } catch (SQLException | java.io.IOException exception) {
             getLogger().severe("No se pudo iniciar la persistencia divina: " + exception.getMessage());
             return false;
