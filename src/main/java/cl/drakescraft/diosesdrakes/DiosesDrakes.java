@@ -10,6 +10,7 @@ import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.LoadoutService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
+import cl.drakescraft.diosesdrakes.service.CooldownService;
 import cl.drakescraft.diosesdrakes.service.VaultEconomyGateway;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import net.milkbowl.vault.economy.Economy;
@@ -82,7 +83,7 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofHours(getConfig().getLong("renunciation.cooldown-hours", 48)),
                     Duration.ofDays(7)
             );
-            skills = new SkillService(repository, profiles, new LoadoutService(repository));
+            skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
         } catch (SQLException | java.io.IOException exception) {
             getLogger().severe("No se pudo iniciar la persistencia divina: " + exception.getMessage());
             return false;
