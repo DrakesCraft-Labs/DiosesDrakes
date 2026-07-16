@@ -1,6 +1,8 @@
 package cl.drakescraft.diosesdrakes;
 
 import cl.drakescraft.diosesdrakes.command.DiosesCommand;
+import cl.drakescraft.diosesdrakes.api.DivineAccess;
+import cl.drakescraft.diosesdrakes.api.DiosesDrakesAccess;
 import cl.drakescraft.diosesdrakes.menu.PantheonMenuListener;
 import cl.drakescraft.diosesdrakes.listener.HephaestusListener;
 import cl.drakescraft.diosesdrakes.service.DivineAuditLogger;
@@ -13,6 +15,7 @@ import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Files;
@@ -45,11 +48,13 @@ public final class DiosesDrakes extends JavaPlugin {
         dioses.setTabCompleter(command);
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
+        getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills), this, ServicePriority.Normal);
         getLogger().info("DiosesDrakes core 0.1.0 habilitado.");
     }
 
     @Override
     public void onDisable() {
+        getServer().getServicesManager().unregisterAll(this);
         if (repository == null) {
             return;
         }
