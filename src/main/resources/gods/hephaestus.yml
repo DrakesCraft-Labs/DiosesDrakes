@@ -1,0 +1,15 @@
+id: hephaestus
+name: Hefesto
+status: planned
+theme:
+  material: ANVIL
+  color: GOLD
+branches:
+  - industry
+  - mining
+  - energy
+  - metallurgy
+notes:
+  - First god scheduled for implementation.
+  - Slimefun interactions must be explicitly allowlisted.
+  - No item duplication, unrestricted flight, or protection bypasses.

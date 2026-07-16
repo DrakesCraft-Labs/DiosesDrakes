@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" role="img" aria-labelledby="title desc">
+  <title id="title">DiosesDrakes</title>
+  <desc id="desc">A gold Greek temple and cyan drake constellation mark.</desc>
+  <rect width="800" height="240" rx="24" fill="#111827"/>
+  <path d="M61 183h254M88 174l25-82h150l25 82M96 82l92-44 92 44M112 102h28v66h-28m44-66h28v66h-28m44-66h28v66h-28m44-66h28v66h-28" fill="none" stroke="#F4C95D" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M265 57c25 2 43 20 43 42 0 34-30 48-57 60 12-18 12-36-2-54-9-12-11-29 16-48Z" fill="#38BDF8"/>
+  <circle cx="288" cy="78" r="5" fill="#F8FAFC"/>
+  <path d="M364 152h356" stroke="#38BDF8" stroke-width="2" opacity=".55"/>
+  <text x="364" y="112" fill="#F8FAFC" font-family="Georgia, serif" font-size="62" font-weight="700">DiosesDrakes</text>
+  <text x="368" y="148" fill="#F4C95D" font-family="Arial, sans-serif" font-size="17" letter-spacing="4">EL PANTEON DE DRAKESCRAFT</text>
+</svg>

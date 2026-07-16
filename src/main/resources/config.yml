@@ -1,0 +1,27 @@
+# Economy values stay disabled until the live balance census is reviewed.
+language: es_CL
+economy:
+  enabled: false
+  weekly-upkeep:
+    enabled: true
+    grace-hours: 24
+  treasury:
+    enabled: true
+    treasury-share-percent: 20
+renunciation:
+  cooldown-hours: 48
+  confirmation-required: true
+pvp:
+  survival-powers-enabled: false
+  divine-arena:
+    enabled: false
+    region-id: pvpdivino
+    progression-source: arena-only
+integrations:
+  auraskills: passive-statistics-only
+  protections:
+    respect-worldguard: true
+    respect-protectionstones: true
+  slimefun:
+    enabled: true
+    configured-items-only: true
