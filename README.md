@@ -39,6 +39,11 @@ Persefone, Hecate, Dionisio, Eros, Nike, Nemesis, Morfeo, Helios, Selene y Tique
 Se implementan **uno por uno**. Cada dios se publica con su arbol, costos,
 restricciones, documentacion y prueba de balance antes de avanzar al siguiente.
 
+El catalogo inicial ya define tres bendiciones por dios: una pasiva, una activa
+con cooldown y una postura temporal. La carga final del jugador se limita a dos
+pasivas, dos activas y una postura; tener un poder desbloqueado no significa que
+pueda permanecer activo al mismo tiempo que todos los demas.
+
 ## Reglas de progreso
 
 - Solo puede haber un dios activo por jugador.

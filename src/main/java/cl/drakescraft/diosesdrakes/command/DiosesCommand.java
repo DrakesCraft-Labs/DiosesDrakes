@@ -1,7 +1,9 @@
 package cl.drakescraft.diosesdrakes.command;
 
 import cl.drakescraft.diosesdrakes.menu.PantheonMenu;
+import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
 import cl.drakescraft.diosesdrakes.model.DivineProfile;
+import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -36,6 +38,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             renounce(player);
             return true;
         }
+        if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
+            showSkillInfo(player, args[1]);
+            return true;
+        }
 
         PantheonMenu.open(player, profiles);
         return true;
@@ -44,7 +50,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("renunciar");
+            return List.of("info", "renunciar");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
+            return SkillCatalog.all().stream().map(SkillDefinition::id).sorted().toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("renunciar")) {
             return List.of("confirmar");
@@ -62,5 +71,14 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
         } catch (Exception exception) {
             player.sendMessage("No se pudo completar la renuncia. El staff debe revisar la auditoria.");
         }
+    }
+
+    private void showSkillInfo(Player player, String skillId) {
+        SkillCatalog.find(skillId).ifPresentOrElse(skill -> {
+            player.sendMessage("[Dioses] " + skill.name() + " | " + skill.god().displayName());
+            player.sendMessage(skill.description());
+            player.sendMessage(skill.informationLine() + " | nivel " + skill.tier());
+            player.sendMessage("Debe desbloquearse y equiparse en una ranura disponible.");
+        }, () -> player.sendMessage("No existe una habilidad con ese identificador."));
     }
 }

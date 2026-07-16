@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.UUID;
 
 /** Persists player progression and the durable side of economy transactions. */
@@ -147,6 +149,45 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    public Set<String> loadout(UUID playerId) throws SQLException {
+        synchronized (lock) {
+            Set<String> skills = new HashSet<>();
+            try (PreparedStatement statement = connection.prepareStatement("SELECT skill_id FROM divine_loadout WHERE player_uuid = ?")) {
+                statement.setString(1, playerId.toString());
+                try (ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        skills.add(result.getString("skill_id"));
+                    }
+                }
+            }
+            return Set.copyOf(skills);
+        }
+    }
+
+    public void replaceLoadout(UUID playerId, Set<String> skillIds) throws SQLException {
+        synchronized (lock) {
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            try (PreparedStatement clear = connection.prepareStatement("DELETE FROM divine_loadout WHERE player_uuid = ?");
+                 PreparedStatement add = connection.prepareStatement("INSERT INTO divine_loadout (player_uuid, skill_id) VALUES (?, ?)")) {
+                clear.setString(1, playerId.toString());
+                clear.executeUpdate();
+                for (String skillId : skillIds) {
+                    add.setString(1, playerId.toString());
+                    add.setString(2, skillId);
+                    add.addBatch();
+                }
+                add.executeBatch();
+                connection.commit();
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(previousAutoCommit);
+            }
+        }
+    }
+
     private void initialize() throws SQLException {
         synchronized (lock) {
             try (Statement statement = connection.createStatement()) {
@@ -181,6 +222,14 @@ public final class DivineRepository implements AutoCloseable {
                             amount REAL NOT NULL,
                             detail TEXT NOT NULL,
                             created_at INTEGER NOT NULL
+                        )
+                        """);
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS divine_loadout (
+                            player_uuid TEXT NOT NULL,
+                            skill_id TEXT NOT NULL,
+                            PRIMARY KEY (player_uuid, skill_id),
+                            FOREIGN KEY (player_uuid) REFERENCES divine_profiles(player_uuid) ON DELETE CASCADE
                         )
                         """);
             }
