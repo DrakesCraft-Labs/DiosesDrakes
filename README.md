@@ -6,7 +6,7 @@ Progresion divina y drenajes economicos para **DrakesCraft**. Cada jugador invie
 en un dios, desbloquea poderes utiles y mantiene sus bendiciones activas mediante
 dinero, ofrendas y juego real.
 
-> Estado: nucleo en construccion. **Hefesto** sera el primer dios jugable.
+> Estado: nucleo persistente en construccion. **Hefesto** sera el primer dios jugable.
 
 ## Que resuelve
 
@@ -73,6 +73,9 @@ mvn clean package
 
 El JAR se genera en `target/`. Las integraciones externas son opcionales en el
 arranque y se activaran solo cuando sus adaptadores esten listos.
+
+La economia permanece desactivada por defecto hasta que el staff apruebe el censo
+de balances y los costos iniciales de Hefesto.
 
 Consulta [la arquitectura](docs/ARCHITECTURE.md) para responsabilidades, reglas de
 seguridad y plan de lanzamiento.
