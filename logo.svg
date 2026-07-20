@@ -1,11 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
   <title id="title">DiosesDrakes</title>
-  <desc id="desc">A gold Greek temple and cyan drake constellation mark.</desc>
-  <rect width="800" height="240" rx="24" fill="#111827"/>
-  <path d="M61 183h254M88 174l25-82h150l25 82M96 82l92-44 92 44M112 102h28v66h-28m44-66h28v66h-28m44-66h28v66h-28m44-66h28v66h-28" fill="none" stroke="#F4C95D" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M265 57c25 2 43 20 43 42 0 34-30 48-57 60 12-18 12-36-2-54-9-12-11-29 16-48Z" fill="#38BDF8"/>
-  <circle cx="288" cy="78" r="5" fill="#F8FAFC"/>
-  <path d="M364 152h356" stroke="#38BDF8" stroke-width="2" opacity=".55"/>
-  <text x="364" y="112" fill="#F8FAFC" font-family="Georgia, serif" font-size="62" font-weight="700">DiosesDrakes</text>
-  <text x="368" y="148" fill="#F4C95D" font-family="Arial, sans-serif" font-size="17" letter-spacing="4">EL PANTEON DE DRAKESCRAFT</text>
+  <desc id="desc">La Convergencia permanente de panteones en DrakesCraft.</desc>
+  <defs>
+    <radialGradient id="vault" cx="50%" cy="42%" r="74%">
+      <stop offset="0" stop-color="#20153f"/>
+      <stop offset=".56" stop-color="#0d1225"/>
+      <stop offset="1" stop-color="#060914"/>
+    </radialGradient>
+    <pattern id="meander" width="48" height="20" patternUnits="userSpaceOnUse">
+      <path d="M2 18V2h28v8H12v8h34V2" fill="none" stroke="#ddb557" stroke-width="3"/>
+    </pattern>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#vault)"/>
+  <rect x="8" y="8" width="1184" height="304" rx="8" fill="none" stroke="#744db0" stroke-width="2"/>
+  <rect x="16" y="16" width="1168" height="20" fill="url(#meander)"/>
+  <rect x="16" y="284" width="1168" height="20" fill="url(#meander)"/>
+
+  <g transform="translate(58 62)" fill="none" stroke="#ddb557" stroke-width="7" stroke-linejoin="round">
+    <path d="M8 194h250M32 178l25-103h152l25 103M43 64 133 8l90 56Z"/>
+    <path d="M58 88h28v80H58m49-80h28v80h-28m49-80h28v80h-28m49-80h28v80h-28"/>
+    <path d="M12 194h242" stroke="#8c61ce" stroke-width="13" opacity=".75"/>
+  </g>
+
+  <g transform="translate(232 52)">
+    <path d="M31 28c40 5 65 34 60 67-6 43-45 56-84 75 20-27 19-54-1-79-14-18-13-44 25-63Z" fill="#29e0d2" filter="url(#glow)">
+      <animate attributeName="opacity" values=".7;1;.7" dur="2.6s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="65" cy="59" r="5" fill="#fff7cc"/>
+  </g>
+
+  <g transform="translate(362 74)">
+    <text x="0" y="73" fill="#f7f4ff" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700">DIOSES DRAKES</text>
+    <text x="4" y="116" fill="#ddb557" font-family="Arial, sans-serif" font-size="19">LA CONVERGENCIA PERMANENTE</text>
+    <text x="4" y="150" fill="#aeeff0" font-family="Arial, sans-serif" font-size="16">PANTEONES · FAVOR · ANCLAS · PODERES · ECONOMIA</text>
+  </g>
+
+  <g transform="translate(386 248)" fill="#29e0d2" filter="url(#glow)">
+    <circle cx="0" cy="0" r="4"/>
+    <circle cx="92" cy="-18" r="4"/>
+    <circle cx="192" cy="2" r="4"/>
+    <circle cx="300" cy="-24" r="4"/>
+    <circle cx="414" cy="-4" r="4"/>
+    <circle cx="524" cy="-26" r="4"/>
+    <circle cx="648" cy="0" r="4"/>
+    <path d="M0 0 92-18 192 2 300-24 414-4 524-26 648 0" fill="none" stroke="#29e0d2" stroke-width="2" stroke-dasharray="720" stroke-dashoffset="720">
+      <animate attributeName="stroke-dashoffset" values="720;0;0" dur="6s" repeatCount="indefinite"/>
+    </path>
+    <circle r="9">
+      <animateMotion dur="6s" repeatCount="indefinite" path="M0 0 92-18 192 2 300-24 414-4 524-26 648 0"/>
+    </circle>
+  </g>
+
+  <path d="M1055 64c-38 26-44 63-16 83-42 4-61 37-45 69 22 43 82 34 97-5 17-44-15-74-15-101 0-18 10-34 27-49-17-3-32-2-48 3Z" fill="#744db0" opacity=".72"/>
+  <path d="M1059 82c-12 24-6 42 18 54-23 7-32 24-26 43" fill="none" stroke="#ddb557" stroke-width="5" filter="url(#glow)">
+    <animate attributeName="opacity" values=".35;1;.35" dur="1.8s" repeatCount="indefinite"/>
+  </path>
 </svg>
