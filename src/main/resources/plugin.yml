@@ -7,7 +7,6 @@ author: JackStar
 description: Progresion divina, economia y sistemas mitologicos para DrakesCraft.
 softdepend:
   - AuraSkills
-  - Odysseia
   - PlaceholderAPI
   - ProtectionStones
   - Slimefun

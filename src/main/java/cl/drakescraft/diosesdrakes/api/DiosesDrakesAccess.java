@@ -3,6 +3,7 @@ package cl.drakescraft.diosesdrakes.api;
 import cl.drakescraft.diosesdrakes.model.GodId;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
+import cl.drakescraft.diosesdrakes.service.BossFavorService;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -11,10 +12,12 @@ import java.util.UUID;
 public final class DiosesDrakesAccess implements DivineAccess {
     private final ProfileService profiles;
     private final SkillService skills;
+    private final BossFavorService bossFavor;
 
-    public DiosesDrakesAccess(ProfileService profiles, SkillService skills) {
+    public DiosesDrakesAccess(ProfileService profiles, SkillService skills, BossFavorService bossFavor) {
         this.profiles = profiles;
         this.skills = skills;
+        this.bossFavor = bossFavor;
     }
 
     @Override
@@ -29,5 +32,15 @@ public final class DiosesDrakesAccess implements DivineAccess {
     @Override
     public boolean hasEquippedSkill(UUID playerId, String skillId) {
         return skills.isEquippedAndUsable(playerId, skillId);
+    }
+
+    @Override
+    public DivineBossReward rewardBossVictory(DivineBossVictory victory) {
+        return bossFavor.reward(victory);
+    }
+
+    @Override
+    public int currentFavor(UUID playerId) {
+        return bossFavor.currentFavor(playerId);
     }
 }

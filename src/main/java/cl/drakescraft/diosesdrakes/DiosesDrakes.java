@@ -19,6 +19,7 @@ import cl.drakescraft.diosesdrakes.service.PassiveBlessingService;
 import cl.drakescraft.diosesdrakes.service.PvpSafetyGate;
 import cl.drakescraft.diosesdrakes.service.UpkeepService;
 import cl.drakescraft.diosesdrakes.service.VaultEconomyGateway;
+import cl.drakescraft.diosesdrakes.service.BossFavorService;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import cl.drakescraft.diosesdrakes.integration.ProtectionGate;
 import cl.drakescraft.diosesdrakes.integration.SlimefunEnergyBridge;
@@ -33,6 +34,8 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Locale;
 
 public final class DiosesDrakes extends JavaPlugin {
     private DivineRepository repository;
@@ -44,6 +47,7 @@ public final class DiosesDrakes extends JavaPlugin {
     private GenericDivineAbilityService abilities;
     private PassiveBlessingService passives;
     private PvpSafetyGate pvpSafety;
+    private BossFavorService bossFavor;
 
     @Override
     public void onEnable() {
@@ -69,7 +73,7 @@ public final class DiosesDrakes extends JavaPlugin {
         getServer().getPluginManager().registerEvents(abilities, this);
         getServer().getPluginManager().registerEvents(abilities.cinematics(), this);
         getServer().getPluginManager().registerEvents(new UpkeepListener(upkeep), this);
-        getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills), this, ServicePriority.Normal);
+        getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills, bossFavor), this, ServicePriority.Normal);
         scheduleUpkeepChecks();
         schedulePassiveRefresh();
         getLogger().info("DiosesDrakes core 0.1.0 habilitado con Hefesto.");
@@ -109,6 +113,17 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofDays(7)
             );
             skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            bossFavor = new BossFavorService(repository,
+                    getConfig().getBoolean("integrations.odysseia.boss-rewards.enabled", true),
+                    getConfig().getInt("integrations.odysseia.boss-rewards.base-favor", 60),
+                    getConfig().getInt("integrations.odysseia.boss-rewards.minimum-favor", 15),
+                    getConfig().getInt("integrations.odysseia.boss-rewards.maximum-favor", 300),
+                    getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.multipliers") == null
+                            ? Map.of()
+                            : getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.multipliers").getKeys(false).stream()
+                            .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                                    key -> key.toLowerCase(Locale.ROOT),
+                                    key -> getConfig().getDouble("integrations.odysseia.boss-rewards.multipliers." + key, 1.0D))));
         } catch (SQLException | java.io.IOException exception) {
             getLogger().severe("No se pudo iniciar la persistencia divina: " + exception.getMessage());
             return false;

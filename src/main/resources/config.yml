@@ -26,6 +26,18 @@ pvp:
     region-id: pvpdivino
     progression-source: arena-only
 integrations:
+  odysseia:
+    boss-rewards:
+      enabled: true
+      base-favor: 60
+      minimum-favor: 15
+      maximum-favor: 300
+      multipliers:
+        thor: 1.4
+        odin: 1.6
+        zeus: 1.6
+        kratos: 1.8
+        tifon: 2.0
   auraskills: passive-statistics-only
   protections:
     respect-worldguard: true

@@ -94,6 +94,7 @@ public final class DivineRepository implements AutoCloseable {
             connection.setAutoCommit(false);
             try (PreparedStatement clearSkills = connection.prepareStatement("DELETE FROM divine_skills WHERE player_uuid = ?");
                  PreparedStatement clearLoadout = connection.prepareStatement("DELETE FROM divine_loadout WHERE player_uuid = ?");
+                 PreparedStatement clearFavor = connection.prepareStatement("DELETE FROM divine_favor WHERE player_uuid = ?");
                  PreparedStatement updateProfile = connection.prepareStatement("""
                          UPDATE divine_profiles
                          SET active_god = NULL, selected_at = NULL, upkeep_due_at = NULL,
@@ -104,6 +105,8 @@ public final class DivineRepository implements AutoCloseable {
                 clearSkills.executeUpdate();
                 clearLoadout.setString(1, playerId.toString());
                 clearLoadout.executeUpdate();
+                clearFavor.setString(1, playerId.toString());
+                clearFavor.executeUpdate();
                 updateProfile.setLong(1, cooldownUntil.toEpochMilli());
                 updateProfile.setString(2, playerId.toString());
                 if (updateProfile.executeUpdate() != 1) {
@@ -285,6 +288,67 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    /** Stores one reward per boss instance/player pair and updates favor atomically. */
+    public BossFavorResult awardBossFavor(UUID bossInstanceId, UUID playerId, GodId god, String bossId, int favor,
+                                           double contribution, double totalContribution, Instant awardedAt) throws SQLException {
+        synchronized (lock) {
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            try (PreparedStatement event = connection.prepareStatement("""
+                    INSERT OR IGNORE INTO divine_boss_rewards
+                    (boss_instance_id, player_uuid, god_id, boss_id, favor, contribution, total_contribution, awarded_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """);
+                 PreparedStatement upsert = connection.prepareStatement("""
+                    INSERT INTO divine_favor (player_uuid, god_id, favor, updated_at) VALUES (?, ?, ?, ?)
+                    ON CONFLICT(player_uuid, god_id) DO UPDATE SET favor = divine_favor.favor + excluded.favor,
+                    updated_at = excluded.updated_at
+                    """);
+                 PreparedStatement select = connection.prepareStatement("SELECT favor FROM divine_favor WHERE player_uuid = ? AND god_id = ?")) {
+                event.setString(1, bossInstanceId.toString());
+                event.setString(2, playerId.toString());
+                event.setString(3, god.name());
+                event.setString(4, bossId);
+                event.setInt(5, favor);
+                event.setDouble(6, contribution);
+                event.setDouble(7, totalContribution);
+                event.setLong(8, awardedAt.toEpochMilli());
+                boolean granted = event.executeUpdate() == 1;
+                if (granted) {
+                    upsert.setString(1, playerId.toString());
+                    upsert.setString(2, god.name());
+                    upsert.setInt(3, favor);
+                    upsert.setLong(4, awardedAt.toEpochMilli());
+                    upsert.executeUpdate();
+                }
+                select.setString(1, playerId.toString());
+                select.setString(2, god.name());
+                try (ResultSet result = select.executeQuery()) {
+                    int total = result.next() ? result.getInt("favor") : 0;
+                    connection.commit();
+                    return new BossFavorResult(granted, total);
+                }
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(previousAutoCommit);
+            }
+        }
+    }
+
+    public int favor(UUID playerId, GodId god) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT favor FROM divine_favor WHERE player_uuid = ? AND god_id = ?")) {
+                statement.setString(1, playerId.toString());
+                statement.setString(2, god.name());
+                try (ResultSet result = statement.executeQuery()) {
+                    return result.next() ? result.getInt("favor") : 0;
+                }
+            }
+        }
+    }
+
     private void initialize() throws SQLException {
         synchronized (lock) {
             try (Statement statement = connection.createStatement()) {
@@ -329,9 +393,35 @@ public final class DivineRepository implements AutoCloseable {
                             FOREIGN KEY (player_uuid) REFERENCES divine_profiles(player_uuid) ON DELETE CASCADE
                         )
                         """);
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS divine_favor (
+                            player_uuid TEXT NOT NULL,
+                            god_id TEXT NOT NULL,
+                            favor INTEGER NOT NULL DEFAULT 0,
+                            updated_at INTEGER NOT NULL,
+                            PRIMARY KEY (player_uuid, god_id),
+                            FOREIGN KEY (player_uuid) REFERENCES divine_profiles(player_uuid) ON DELETE CASCADE
+                        )
+                        """);
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS divine_boss_rewards (
+                            boss_instance_id TEXT NOT NULL,
+                            player_uuid TEXT NOT NULL,
+                            god_id TEXT NOT NULL,
+                            boss_id TEXT NOT NULL,
+                            favor INTEGER NOT NULL,
+                            contribution REAL NOT NULL,
+                            total_contribution REAL NOT NULL,
+                            awarded_at INTEGER NOT NULL,
+                            PRIMARY KEY (boss_instance_id, player_uuid),
+                            FOREIGN KEY (player_uuid) REFERENCES divine_profiles(player_uuid) ON DELETE CASCADE
+                        )
+                        """);
             }
         }
     }
+
+    public record BossFavorResult(boolean granted, int totalFavor) { }
 
     private Instant instant(ResultSet result, String column) throws SQLException {
         long value = result.getLong(column);
