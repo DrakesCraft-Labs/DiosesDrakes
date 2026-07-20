@@ -93,6 +93,7 @@ public final class DivineRepository implements AutoCloseable {
             boolean previousAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             try (PreparedStatement clearSkills = connection.prepareStatement("DELETE FROM divine_skills WHERE player_uuid = ?");
+                 PreparedStatement clearLoadout = connection.prepareStatement("DELETE FROM divine_loadout WHERE player_uuid = ?");
                  PreparedStatement updateProfile = connection.prepareStatement("""
                          UPDATE divine_profiles
                          SET active_god = NULL, selected_at = NULL, upkeep_due_at = NULL,
@@ -101,6 +102,8 @@ public final class DivineRepository implements AutoCloseable {
                          """)) {
                 clearSkills.setString(1, playerId.toString());
                 clearSkills.executeUpdate();
+                clearLoadout.setString(1, playerId.toString());
+                clearLoadout.executeUpdate();
                 updateProfile.setLong(1, cooldownUntil.toEpochMilli());
                 updateProfile.setString(2, playerId.toString());
                 if (updateProfile.executeUpdate() != 1) {

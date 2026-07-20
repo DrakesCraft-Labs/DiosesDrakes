@@ -58,7 +58,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        PantheonMenu.open(player, profiles);
+        PantheonMenu.open(player, profiles, skills);
         return true;
     }
 

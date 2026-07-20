@@ -47,7 +47,7 @@ public final class DiosesDrakes extends JavaPlugin {
 
         dioses.setExecutor(command);
         dioses.setTabCompleter(command);
-        getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles), this);
+        getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles, skills), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
         getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills), this, ServicePriority.Normal);
         getLogger().info("DiosesDrakes core 0.1.0 habilitado.");

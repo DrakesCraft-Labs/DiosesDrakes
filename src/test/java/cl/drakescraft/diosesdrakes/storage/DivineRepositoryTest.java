@@ -9,6 +9,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +31,7 @@ class DivineRepositoryTest {
 
             repository.selectGod(playerId, GodId.HEPHAESTUS, now, now.plusSeconds(604800));
             repository.unlockSkill(playerId, GodId.HEPHAESTUS, "hephaestus.forja_viva", now);
+            repository.replaceLoadout(playerId, Set.of("hephaestus.forja_viva"));
             assertTrue(repository.hasUnlockedSkill(playerId, "hephaestus.forja_viva"));
             DivineProfile selected = repository.find(playerId).orElseThrow();
             assertEquals(GodId.HEPHAESTUS, selected.activeGod());
@@ -39,6 +41,7 @@ class DivineRepositoryTest {
             DivineProfile renounced = repository.find(playerId).orElseThrow();
             assertTrue(renounced.activeGodOptional().isEmpty());
             assertEquals(cooldownUntil, renounced.renounceAvailableAt());
+            assertTrue(repository.loadout(playerId).isEmpty());
             assertFalse(renounced.canChooseGod(now));
             assertTrue(renounced.canChooseGod(cooldownUntil));
         }

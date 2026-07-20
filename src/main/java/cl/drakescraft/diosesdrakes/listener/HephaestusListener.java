@@ -21,7 +21,8 @@ public final class HephaestusListener implements Listener {
         }
         int original = event.getExpToDrop();
         if (original > 0) {
-            event.setExpToDrop((int) Math.ceil(original * 1.25D));
+            // Experience is integral; flooring avoids turning a one-XP extraction into two.
+            event.setExpToDrop(original + (int) Math.floor(original * 0.25D));
         }
     }
 }

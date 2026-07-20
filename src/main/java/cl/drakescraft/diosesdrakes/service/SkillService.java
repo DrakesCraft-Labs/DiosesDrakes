@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.Set;
 
 /** Central authorization point for every divine effect. */
 public final class SkillService {
@@ -43,6 +44,16 @@ public final class SkillService {
 
     public void unequip(UUID playerId, String skillId) throws SQLException {
         loadout.unequip(playerId, skillId);
+    }
+
+    /** Returns the persisted loadout so the GUI can describe the player's real state. */
+    public Set<String> equipped(UUID playerId) throws SQLException {
+        return loadout.equipped(playerId);
+    }
+
+    /** Checks ownership without silently equipping or activating the blessing. */
+    public boolean isUnlocked(UUID playerId, String skillId) throws SQLException {
+        return repository.hasUnlockedSkill(playerId, definition(skillId).id());
     }
 
     public boolean isEquippedAndUsable(UUID playerId, String skillId) {
