@@ -66,6 +66,8 @@ public final class DiosesDrakes extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles, skills, transactions), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
         getServer().getPluginManager().registerEvents(pvpSafety, this);
+        getServer().getPluginManager().registerEvents(abilities, this);
+        getServer().getPluginManager().registerEvents(abilities.cinematics(), this);
         getServer().getPluginManager().registerEvents(new UpkeepListener(upkeep), this);
         getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills), this, ServicePriority.Normal);
         scheduleUpkeepChecks();
@@ -76,6 +78,9 @@ public final class DiosesDrakes extends JavaPlugin {
     @Override
     public void onDisable() {
         getServer().getServicesManager().unregisterAll(this);
+        if (abilities != null) {
+            abilities.shutdown();
+        }
         if (repository == null) {
             return;
         }
@@ -133,7 +138,9 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofDays(7),
                     Duration.ofHours(getConfig().getLong("economy.weekly-upkeep.grace-hours", 24)),
                     god -> getConfig().getDouble("economy.weekly-upkeep.costs." + god.name().toLowerCase(),
-                            getConfig().getDouble("economy.weekly-upkeep.default-cost", 1500.0))
+                            getConfig().getDouble("economy.weekly-upkeep.default-cost", 5000.0)),
+                    getConfig().getDouble("economy.weekly-upkeep.invested-percent", 2.5D),
+                    getConfig().getDouble("economy.weekly-upkeep.max-cost", 2500000.0D)
             );
         }
         return initializeHephaestus(transactions);

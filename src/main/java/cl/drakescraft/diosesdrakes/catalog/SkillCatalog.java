@@ -206,16 +206,16 @@ public final class SkillCatalog {
 
     private static double defaultCost(int tier) {
         return switch (tier) {
-            case 1 -> 1200;
-            case 2 -> 2800;
-            case 3 -> 4500;
-            case 4 -> 6500;
-            case 5 -> 8500;
-            case 6 -> 12000;
-            case 7 -> 16000;
-            case 8 -> 22000;
-            case 9 -> 30000;
-            default -> 42000;
+            case 1 -> 10_000;
+            case 2 -> 50_000;
+            case 3 -> 150_000;
+            case 4 -> 400_000;
+            case 5 -> 900_000;
+            case 6 -> 2_000_000;
+            case 7 -> 4_500_000;
+            case 8 -> 9_000_000;
+            case 9 -> 18_000_000;
+            default -> 36_000_000;
         };
     }
 

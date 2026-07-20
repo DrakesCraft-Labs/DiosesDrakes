@@ -19,6 +19,9 @@ import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -31,12 +34,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /** Executes survival-safe divine powers. World mutation is always gated by the player's protections. */
-public final class GenericDivineAbilityService {
+public final class GenericDivineAbilityService implements Listener {
     private final JavaPlugin plugin;
     private final SkillService skills;
     private final HephaestusAbilityService hephaestus;
     private final PvpSafetyGate pvp;
     private final ProtectionGate protections;
+    private final DivineCinematicService cinematics;
     private final Map<UUID, FlightState> flights = new HashMap<>();
     private final Map<UUID, AvatarState> avatars = new HashMap<>();
 
@@ -47,6 +51,53 @@ public final class GenericDivineAbilityService {
         this.hephaestus = hephaestus;
         this.pvp = pvp;
         this.protections = protections;
+        this.cinematics = new DivineCinematicService(
+                plugin,
+                plugin.getConfig().getBoolean("visuals.display-entities.enabled", true),
+                plugin.getConfig().getInt("visuals.display-entities.max-displays-per-scene", 8),
+                (float) plugin.getConfig().getDouble("visuals.display-entities.view-range", 32.0D)
+        );
+    }
+
+    public DivineCinematicService cinematics() {
+        return cinematics;
+    }
+
+    /** Cleans temporary flight, avatar and display state before a plugin reload or shutdown. */
+    public void shutdown() {
+        flights.forEach((playerId, state) -> {
+            state.task().cancel();
+            Player player = plugin.getServer().getPlayer(playerId);
+            if (player != null) {
+                restoreFlight(player, state);
+            }
+        });
+        avatars.forEach((playerId, state) -> {
+            state.task().cancel();
+            Player player = plugin.getServer().getPlayer(playerId);
+            if (player != null) {
+                restoreScale(player, state.scale());
+            }
+        });
+        flights.clear();
+        avatars.clear();
+        cinematics.shutdown();
+    }
+
+    /** Restores temporary player state before it can be persisted by a disconnect. */
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID playerId = event.getPlayer().getUniqueId();
+        FlightState flight = flights.remove(playerId);
+        if (flight != null) {
+            flight.task().cancel();
+            restoreFlight(event.getPlayer(), flight);
+        }
+        AvatarState avatar = avatars.remove(playerId);
+        if (avatar != null) {
+            avatar.task().cancel();
+            restoreScale(event.getPlayer(), avatar.scale());
+        }
     }
 
     /** Authorizes the skill first, then routes it to its real effect family. */
@@ -64,6 +115,9 @@ public final class GenericDivineAbilityService {
         }
         if (pvp.inCombat(player, Instant.now())) {
             return UseResult.denied("Las bendiciones de supervivencia se bloquean durante combate PvP.");
+        }
+        if (isStrike(skill) && nearestAllowedMonster(player) == null) {
+            return UseResult.denied("No hay una criatura hostil accesible fuera de una proteccion ajena.");
         }
 
         SkillService.ActivationResult activation = skills.tryActivate(player.getUniqueId(), skill.id(), Instant.now());
@@ -97,7 +151,7 @@ public final class GenericDivineAbilityService {
             default -> effects(player, seconds, 0, PotionEffectType.REGENERATION);
         }
         if (skill.id().equals("hermes.ascenso_de_icaro")) {
-            grantFlight(player, Math.min(seconds, 4));
+            grantFlight(player, skill.god(), Math.min(seconds, 4));
         }
     }
 
@@ -105,7 +159,7 @@ public final class GenericDivineAbilityService {
     private void applyAscension(Player player, SkillDefinition skill, int seconds) {
         switch (skill.tier()) {
             case 5 -> strikeCreature(player, skill.god(), 24.0D);
-            case 6 -> grantFlight(player, seconds);
+            case 6 -> grantFlight(player, skill.god(), seconds);
             case 7 -> establishDomain(player, skill.god(), seconds);
             case 8 -> strikeCreature(player, skill.god(), 100.0D);
             case 9 -> becomeAvatar(player, skill.god(), seconds);
@@ -116,7 +170,7 @@ public final class GenericDivineAbilityService {
     /** Uses an effect-only lightning strike so it cannot ignite terrain or damage another player. */
     private void strikeCreature(Player player, GodId god, double damage) {
         Monster target = player.getWorld().getNearbyEntities(player.getLocation(), 14, 9, 14,
-                        entity -> entity instanceof Monster)
+                        entity -> entity instanceof Monster && protections.canAffect(player, entity.getLocation()))
                 .stream().map(entity -> (Monster) entity)
                 .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(player.getLocation())))
                 .orElse(null);
@@ -126,13 +180,12 @@ public final class GenericDivineAbilityService {
         }
         target.getWorld().strikeLightningEffect(target.getLocation());
         target.damage(damage, player);
-        target.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, target.getLocation().add(0, 1, 0), 32,
-                0.55, 0.85, 0.55, 0.14);
+        cinematics.strike(player, god, target, damage);
         player.sendActionBar(Component.text(damage >= 100 ? "Veredicto divino: 100 de dano PvE." : "Descarga divina sobre " + target.getType() + "."));
     }
 
     /** Grants a timed flight state and restores exactly the player's former flight permissions afterwards. */
-    private void grantFlight(Player player, int seconds) {
+    private void grantFlight(Player player, GodId god, int seconds) {
         FlightState previous = flights.remove(player.getUniqueId());
         if (previous != null) {
             previous.task().cancel();
@@ -143,6 +196,7 @@ public final class GenericDivineAbilityService {
         player.setAllowFlight(true);
         player.setFlying(true);
         effects(player, seconds + 4, 4, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
+        cinematics.flight(player, god, seconds);
         BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             FlightState state = flights.remove(player.getUniqueId());
             if (state == null || !player.isOnline()) {
@@ -164,6 +218,7 @@ public final class GenericDivineAbilityService {
 
     /** Applies a god-specific local domain without changing the global world weather or bypassing a claim. */
     private void establishDomain(Player player, GodId god, int seconds) {
+        cinematics.domain(player, god, seconds);
         switch (domainFor(god)) {
             case WEATHER -> {
                 player.setPlayerWeather(WeatherType.DOWNFALL);
@@ -231,6 +286,7 @@ public final class GenericDivineAbilityService {
         double originalScale = scale.getBaseValue();
         scale.setBaseValue(Math.min(1.85D, Math.max(1.35D, originalScale * 1.65D)));
         effects(player, seconds, 2, PotionEffectType.RESISTANCE, PotionEffectType.STRENGTH, PotionEffectType.ABSORPTION);
+        cinematics.avatar(player, god, seconds);
         BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             AvatarState state = avatars.remove(player.getUniqueId());
             if (state != null && player.isOnline()) {
@@ -249,19 +305,27 @@ public final class GenericDivineAbilityService {
         }
     }
 
-    /** Resolves SCALE defensively for servers which deliberately run an older compatibility API. */
+    /** Paper 1.21.11 exposes SCALE directly; the null check at use sites still protects unusual entity types. */
     private Attribute scaleAttribute() {
-        try {
-            return Attribute.valueOf("SCALE");
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
+        return Attribute.SCALE;
     }
 
     private void effects(Player player, int seconds, int amplifier, PotionEffectType... types) {
         for (PotionEffectType type : types) {
             player.addPotionEffect(new PotionEffect(type, Math.max(1, seconds) * 20, amplifier, true, true, true));
         }
+    }
+
+    private boolean isStrike(SkillDefinition skill) {
+        return skill.tier() == 5 || skill.tier() == 8;
+    }
+
+    private Monster nearestAllowedMonster(Player player) {
+        return player.getWorld().getNearbyEntities(player.getLocation(), 14, 9, 14,
+                        entity -> entity instanceof Monster && protections.canAffect(player, entity.getLocation()))
+                .stream().map(entity -> (Monster) entity)
+                .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(player.getLocation())))
+                .orElse(null);
     }
 
     private PotionEffectType primaryEffect(GodId god) {
@@ -319,6 +383,7 @@ public final class GenericDivineAbilityService {
         player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1.0, 0), 18,
                 0.55, 0.65, 0.55, 0.08);
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.65F, pitchFor(skill.god()));
+        cinematics.announce(player, skill.god());
         player.sendActionBar(Component.text(skill.name() + " | " + seconds + " s | recarga " + skill.cooldownSeconds() + " s"));
     }
 

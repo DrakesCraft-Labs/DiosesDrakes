@@ -28,10 +28,12 @@ dinero, ofrendas y juego real.
 | Tesoro del Olimpo | Fraccion limitada para eventos, bosses y recompensas. |
 | Drenaje | Fraccion retirada de circulacion para controlar inflacion. |
 
-Hefesto parte con valores piloto configurables: 1.200 para Forja Viva, 2.800 para
-Pulso de Red y 4.500 para Ojo de Mena; su mantenimiento semanal inicial es 1.500.
-El staff debe ajustar esos valores luego de la primera semana observando ingresos,
-balances y el archivo de auditoria.
+La curva base empieza en 10.000 y concentra la inversion al final: el decimo nodo
+cuesta 36.000.000 y completar una rama requiere 71.010.000 monedas. Asi los
+jugadores nuevos pueden entrar por las primeras bendiciones, mientras los balances
+de millones tienen una progresion real donde invertir. El mantenimiento semanal es
+5.000 mas el 2,5% de lo ya invertido en la rama, con tope de 2.500.000; se cobra
+solo si el jugador decide conservar sus bendiciones activas y deja auditoria.
 
 ## Panteon
 
@@ -77,6 +79,11 @@ en el cliente una cantidad limitada de minerales durante ocho segundos, solo en
 chunks cargados y donde WorldGuard permite interactuar. Ninguno modifica bloques,
 inventarios ni protecciones.
 
+Los veredictos y descargas primero descartan criaturas en claims ajenos mediante la
+misma consulta de WorldGuard que protege las mutaciones de bloque. Las explosiones
+divinas son solo particulas, sonido y displays: no invocan TNT ni `createExplosion`,
+no rompen bloques, no incendian y no empujan jugadores.
+
 ## Hefesto: uso actual
 
 1. Selecciona a Hefesto en `/dioses`.
@@ -92,7 +99,11 @@ progreso: solamente explica la senda activa del jugador y puede pedirse de nuevo
 sin riesgo. Para consultar cualquier nodo puntual existe `/dioses info <id>`.
 
 Las activaciones muestran duración y recarga en la barra de acción. Cada familia
-divina tiene partículas, color y sonido propios; Hefesto además muestra la energía
+divina tiene partículas, color, sonido y escenas nativas de Paper con `BlockDisplay`;
+las descargas forman una detonación visual, los dominios trazan un anillo animado,
+el vuelo deja estela y los avatares reciben halo. Las escenas no requieren resource
+pack, se limitan a ocho displays por jugador y se limpian al terminar, desconectar o
+deshabilitar el plugin. Hefesto además muestra la energía
 que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
 su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
 
@@ -116,7 +127,7 @@ suspenden sin borrar progreso hasta el siguiente pago exitoso.
 
 ## Desarrollo
 
-Requisitos: Java 21 y un servidor Paper/Purpur compatible con 1.21.1.
+Requisitos: Java 21 y un servidor Paper/Purpur compatible con 1.21.11.
 
 ```powershell
 mvn clean package

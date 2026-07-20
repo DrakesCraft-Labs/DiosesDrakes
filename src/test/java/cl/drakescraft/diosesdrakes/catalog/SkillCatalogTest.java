@@ -60,4 +60,12 @@ class SkillCatalogTest {
             assertTrue(branch.stream().filter(skill -> skill.tier() > 1).allMatch(skill -> !skill.prerequisites().isEmpty()));
         }
     }
+
+    @Test
+    void completeAscensionIsARealLateGameMoneySink() {
+        double total = SkillCatalog.forGod(GodId.ZEUS).stream().mapToDouble(skill -> skill.unlockCost()).sum();
+        assertTrue(total >= 70_000_000.0D);
+        assertEquals(36_000_000.0D, SkillCatalog.forGod(GodId.ZEUS).stream()
+                .filter(skill -> skill.tier() == 10).findFirst().orElseThrow().unlockCost());
+    }
 }

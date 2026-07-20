@@ -1,4 +1,4 @@
-# Valores iniciales de Hefesto. Ajustalos tras observar una semana de economia real.
+# Economia y efectos divinos. Los costes altos se concentran en la ascension para mover capital sin castigar al jugador nuevo.
 language: es_CL
 economy:
   enabled: true
@@ -6,9 +6,13 @@ economy:
     enabled: true
     grace-hours: 24
     check-minutes: 5
-    default-cost: 1500.0
+    # Se suma al 2.5% de lo invertido en habilidades del patron. Un arbol completo
+    # requiere una ofrenda semanal relevante, mientras las ramas tempranas siguen accesibles.
+    default-cost: 5000.0
+    invested-percent: 2.5
+    max-cost: 2500000.0
     costs:
-      hephaestus: 1500.0
+      hephaestus: 5000.0
   treasury:
     enabled: true
     treasury-share-percent: 20
@@ -44,3 +48,9 @@ hephaestus:
   ojo-de-mena:
     radius: 8
     max-markers: 24
+visuals:
+  # Display Entities nativas de Paper: no resource pack, no mod y siempre con limpieza programada.
+  display-entities:
+    enabled: true
+    max-displays-per-scene: 8
+    view-range: 32

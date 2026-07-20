@@ -19,15 +19,20 @@ public final class UpkeepService {
     private final Duration period;
     private final Duration grace;
     private final ToDoubleFunction<GodId> costForGod;
+    private final double investedPercent;
+    private final double maxCost;
 
     public UpkeepService(DivineRepository repository, ProfileService profiles, DivineTransactionService transactions,
-                         Duration period, Duration grace, ToDoubleFunction<GodId> costForGod) {
+                         Duration period, Duration grace, ToDoubleFunction<GodId> costForGod,
+                         double investedPercent, double maxCost) {
         this.repository = repository;
         this.profiles = profiles;
         this.transactions = transactions;
         this.period = period;
         this.grace = grace;
         this.costForGod = costForGod;
+        this.investedPercent = investedPercent;
+        this.maxCost = maxCost;
     }
 
     public Settlement settle(Player player, Instant now) {
@@ -37,7 +42,12 @@ public final class UpkeepService {
                 return Settlement.notDue();
             }
 
-            double amount = costForGod.applyAsDouble(profile.activeGod());
+            double amount = UpkeepCostPolicy.calculate(
+                    costForGod.applyAsDouble(profile.activeGod()),
+                    investedPercent,
+                    maxCost,
+                    repository.unlockedSkills(player.getUniqueId())
+            );
             if (amount <= 0) {
                 repository.renewUpkeep(player.getUniqueId(), now.plus(period));
                 return Settlement.renewed("Tu mantenimiento divino fue renovado.");

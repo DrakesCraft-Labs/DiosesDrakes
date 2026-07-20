@@ -269,6 +269,22 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    /** Returns the player's persisted branch state for maintenance and UI calculations. */
+    public Set<String> unlockedSkills(UUID playerId) throws SQLException {
+        synchronized (lock) {
+            Set<String> skills = new HashSet<>();
+            try (PreparedStatement statement = connection.prepareStatement("SELECT skill_id FROM divine_skills WHERE player_uuid = ?")) {
+                statement.setString(1, playerId.toString());
+                try (ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        skills.add(result.getString("skill_id"));
+                    }
+                }
+            }
+            return Set.copyOf(skills);
+        }
+    }
+
     private void initialize() throws SQLException {
         synchronized (lock) {
             try (Statement statement = connection.createStatement()) {

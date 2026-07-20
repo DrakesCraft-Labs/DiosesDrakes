@@ -1,6 +1,7 @@
 package cl.drakescraft.diosesdrakes.integration;
 
 import org.bukkit.block.Block;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
@@ -26,5 +27,10 @@ public final class ProtectionGate {
             // A protection integration that cannot answer must never grant a bypass.
             return false;
         }
+    }
+
+    /** Reuses the same WorldGuard query before a power targets an entity's location. */
+    public boolean canAffect(Player player, Location location) {
+        return canInteract(player, location.getBlock());
     }
 }
