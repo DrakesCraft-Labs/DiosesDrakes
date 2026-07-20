@@ -73,7 +73,10 @@ integraciones Slimefun se habilitan por listas explicitas: una habilidad no obti
 acceso a una maquina, receta o red por existir; debe estar autorizada en configuracion.
 
 `Pulso de Red` añade energia limitada a maquinas Slimefun expresamente permitidas
-en `config.yml`, dentro del alcance y autorizacion del jugador. `Ojo de Mena` marca
+en `config.yml`, dentro del alcance y autorizacion del jugador. La lista inicial se
+limita a la Mass Fabricator y al UU Crafter de LiteXpansion: consumidores de 16.666
+y 50.000 J/s, respectivamente. No energiza generadores, baterias ni maquinas de la
+linea Infinity/Cheat. `Ojo de Mena` marca
 en el cliente una cantidad limitada de minerales durante ocho segundos, solo en
 chunks cargados y donde WorldGuard permite interactuar. Ninguno modifica bloques,
 inventarios ni protecciones.

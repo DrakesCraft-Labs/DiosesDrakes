@@ -32,13 +32,14 @@ integrations:
     pulso-de-red:
       radius: 6
       max-machines: 3
-      energy-per-machine-per-pulse: 12
+      # Se aplica seis veces por activacion: 24.576 J por maquina y hasta
+      # 73.728 J si Hefesto encuentra los tres consumidores permitidos.
+      energy-per-machine-per-pulse: 4096
       interval-seconds: 5
       allowed-item-ids:
-        - ELECTRIC_INGOT_FACTORY
-        - ELECTRIC_ORE_GRINDER
-        - ELECTRIC_DUST_WASHER
-        - ELECTRIC_GOLD_PAN
+        # LiteXpansion: consumidores industriales reales de 16.666 y 50.000 J/s.
+        - MASS_FABRICATOR_MACHINE
+        - UU_CRAFTER
 hephaestus:
   ojo-de-mena:
     radius: 8
