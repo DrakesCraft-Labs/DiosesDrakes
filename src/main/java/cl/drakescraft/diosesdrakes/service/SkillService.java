@@ -53,6 +53,22 @@ public final class SkillService {
         return loadout.equipped(playerId);
     }
 
+    /** Reads the small equipped loadout once instead of probing every catalog node on each refresh. */
+    public Set<SkillDefinition> equippedUsable(UUID playerId) {
+        try {
+            DivineProfile profile = profiles.profile(playerId);
+            if (profile.upkeepSuspended() || profile.activeGod() == null) {
+                return Set.of();
+            }
+            return loadout.equipped(playerId).stream()
+                    .flatMap(skillId -> SkillCatalog.find(skillId).stream())
+                    .filter(skill -> skill.god() == profile.activeGod())
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        } catch (SQLException exception) {
+            return Set.of();
+        }
+    }
+
     /** Checks ownership without silently equipping or activating the blessing. */
     public boolean isUnlocked(UUID playerId, String skillId) throws SQLException {
         return repository.hasUnlockedSkill(playerId, definition(skillId).id());

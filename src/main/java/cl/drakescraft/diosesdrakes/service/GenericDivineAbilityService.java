@@ -43,6 +43,7 @@ public final class GenericDivineAbilityService implements Listener {
     private final PvpSafetyGate pvp;
     private final ProtectionGate protections;
     private final DivineCinematicService cinematics;
+    private final DivineAbilityAuditLogger audit;
     private final Map<UUID, FlightState> flights = new HashMap<>();
     private final Map<UUID, AvatarState> avatars = new HashMap<>();
     private final Map<UUID, GuardState> guards = new HashMap<>();
@@ -57,9 +58,11 @@ public final class GenericDivineAbilityService implements Listener {
         this.cinematics = new DivineCinematicService(
                 plugin,
                 plugin.getConfig().getBoolean("visuals.display-entities.enabled", true),
+                plugin.getConfig().getBoolean("visuals.display-entities.bedrock-enabled", false),
                 plugin.getConfig().getInt("visuals.display-entities.max-displays-per-scene", 8),
                 (float) plugin.getConfig().getDouble("visuals.display-entities.view-range", 32.0D)
         );
+        this.audit = new DivineAbilityAuditLogger(plugin.getDataFolder().toPath().resolve("audit"));
     }
 
     public DivineCinematicService cinematics() {
@@ -109,33 +112,38 @@ public final class GenericDivineAbilityService implements Listener {
     public UseResult use(Player player, String skillId) {
         SkillDefinition skill = SkillCatalog.find(skillId).orElse(null);
         if (skill == null) {
-            return UseResult.denied("No existe esa habilidad.");
+            return audited(player, skillId, UseResult.denied("No existe esa habilidad."));
         }
         if (skill.id().equals(HephaestusAbilityService.NETWORK_PULSE) || skill.id().equals(HephaestusAbilityService.ORE_SIGHT)) {
             HephaestusAbilityService.UseResult result = hephaestus.use(player, skillId);
-            return new UseResult(result.started(), result.message());
+            return audited(player, skillId, new UseResult(result.started(), result.message()));
         }
         if (skill.type() == SkillType.PASSIVE) {
-            return UseResult.denied("Esta bendicion es pasiva; equipala para mantenerla activa.");
+            return audited(player, skillId, UseResult.denied("Esta bendicion es pasiva; equipala para mantenerla activa."));
         }
         if (pvp.inCombat(player, Instant.now())) {
-            return UseResult.denied("Las bendiciones de supervivencia se bloquean durante combate PvP.");
+            return audited(player, skillId, UseResult.denied("Las bendiciones de supervivencia se bloquean durante combate PvP."));
         }
         String combatRequirement = combatRequirement(player, skill);
         if (combatRequirement != null) {
-            return UseResult.denied(combatRequirement);
+            return audited(player, skillId, UseResult.denied(combatRequirement));
         }
         if (requiresMonster(skill) && nearestAllowedMonster(player, targetRange(player, skill)) == null) {
-            return UseResult.denied("No hay una criatura hostil accesible fuera de una proteccion ajena.");
+            return audited(player, skillId, UseResult.denied("No hay una criatura hostil accesible fuera de una proteccion ajena."));
         }
 
         SkillService.ActivationResult activation = skills.tryActivate(player.getUniqueId(), skill.id(), Instant.now());
         if (!activation.started()) {
-            return UseResult.denied(activation.message());
+            return audited(player, skillId, UseResult.denied(activation.message()));
         }
         apply(player, skill, Math.max(1, activation.durationSeconds()));
         announceActivation(player, skill, activation.durationSeconds());
-        return UseResult.started(skill.name() + " activo durante " + activation.durationSeconds() + " segundos.");
+        return audited(player, skillId, UseResult.started(skill.name() + " activo durante " + activation.durationSeconds() + " segundos."));
+    }
+
+    private UseResult audited(Player player, String skillId, UseResult result) {
+        audit.record(player, skillId, result.started() ? "started" : "denied:" + result.message());
+        return result;
     }
 
     /** Preserves the early branches while turning tiers four through nine into distinct power milestones. */

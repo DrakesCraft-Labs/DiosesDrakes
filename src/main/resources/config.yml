@@ -52,5 +52,7 @@ visuals:
   # Display Entities nativas de Paper: no resource pack, no mod y siempre con limpieza programada.
   display-entities:
     enabled: true
+    # Floodgate/Bedrock conserva particulas y sonidos; activa esto solo despues de validar displays en movil.
+    bedrock-enabled: false
     max-displays-per-scene: 8
     view-range: 32

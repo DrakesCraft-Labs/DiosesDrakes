@@ -33,13 +33,16 @@ import java.util.UUID;
 public final class DivineCinematicService implements Listener {
     private final JavaPlugin plugin;
     private final boolean displaysEnabled;
+    private final boolean bedrockDisplaysEnabled;
     private final int maxDisplaysPerScene;
     private final float viewRange;
     private final Map<UUID, Scene> activeScenes = new HashMap<>();
 
-    public DivineCinematicService(JavaPlugin plugin, boolean displaysEnabled, int maxDisplaysPerScene, float viewRange) {
+    public DivineCinematicService(JavaPlugin plugin, boolean displaysEnabled, boolean bedrockDisplaysEnabled,
+                                  int maxDisplaysPerScene, float viewRange) {
         this.plugin = plugin;
         this.displaysEnabled = displaysEnabled;
+        this.bedrockDisplaysEnabled = bedrockDisplaysEnabled;
         this.maxDisplaysPerScene = Math.max(0, Math.min(12, maxDisplaysPerScene));
         this.viewRange = Math.max(8.0F, Math.min(64.0F, viewRange));
     }
@@ -59,7 +62,7 @@ public final class DivineCinematicService implements Listener {
         UUID sceneId = UUID.randomUUID();
         Location center = target.getLocation().add(0, Math.max(0.8, target.getHeight() * 0.5), 0);
         List<Entity> displays = new ArrayList<>();
-        if (displaysEnabled) {
+        if (shouldUseDisplays(player)) {
             int count = Math.min(4, maxDisplaysPerScene);
             for (int index = 0; index < count; index++) {
                 double angle = (Math.PI * 2D * index) / Math.max(1, count);
@@ -112,7 +115,7 @@ public final class DivineCinematicService implements Listener {
         UUID sceneId = UUID.randomUUID();
         Location center = player.getLocation().add(0, 0.15, 0);
         List<Entity> displays = new ArrayList<>();
-        if (displaysEnabled) {
+        if (shouldUseDisplays(player)) {
             int count = Math.min(8, maxDisplaysPerScene);
             for (int index = 0; index < count; index++) {
                 double angle = (Math.PI * 2D * index) / Math.max(1, count);
@@ -161,7 +164,7 @@ public final class DivineCinematicService implements Listener {
         UUID sceneId = UUID.randomUUID();
         Location center = player.getLocation().add(0, 2.7, 0);
         List<Entity> displays = new ArrayList<>();
-        if (displaysEnabled) {
+        if (shouldUseDisplays(player)) {
             int count = Math.min(6, maxDisplaysPerScene);
             for (int index = 0; index < count; index++) {
                 double angle = (Math.PI * 2D * index) / Math.max(1, count);
@@ -193,6 +196,25 @@ public final class DivineCinematicService implements Listener {
             display.setGlowColorOverride(Color.WHITE);
             display.setTransformation(transform(scale, 0.0F));
         });
+    }
+
+    /** Floodgate clients keep particles and sound, while displays can be explicitly disabled for Bedrock. */
+    private boolean shouldUseDisplays(Player player) {
+        return displaysEnabled && (bedrockDisplaysEnabled || !isFloodgatePlayer(player.getUniqueId()));
+    }
+
+    private boolean isFloodgatePlayer(UUID playerId) {
+        if (plugin.getServer().getPluginManager().getPlugin("floodgate") == null
+                && plugin.getServer().getPluginManager().getPlugin("Floodgate") == null) {
+            return false;
+        }
+        try {
+            Class<?> apiType = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            Object api = apiType.getMethod("getInstance").invoke(null);
+            return Boolean.TRUE.equals(apiType.getMethod("isFloodgatePlayer", UUID.class).invoke(api, playerId));
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            return false;
+        }
     }
 
     private void animate(BlockDisplay display, float scale, int ticks, float rotation) {

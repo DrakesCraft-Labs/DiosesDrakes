@@ -104,7 +104,8 @@ divina tiene partículas, color, sonido y escenas nativas de Paper con `BlockDis
 las descargas forman una detonación visual, los dominios trazan un anillo animado,
 el vuelo deja estela y los avatares reciben halo. Las escenas no requieren resource
 pack, se limitan a ocho displays por jugador y se limpian al terminar, desconectar o
-deshabilitar el plugin. Hefesto además muestra la energía
+deshabilitar el plugin. Con Floodgate, Bedrock conserva sonidos y particulas; los
+displays quedan desactivados por defecto hasta validarlos en movil. Hefesto además muestra la energía
 que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
 su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
 

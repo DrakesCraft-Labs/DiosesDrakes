@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,6 +62,21 @@ class SkillServiceTest {
             loadout.equip(playerId, "zeus.chispa_regia");
 
             assertThrows(IllegalStateException.class, () -> loadout.equip(playerId, "hera.velo_del_hogar"));
+        }
+    }
+
+    @Test
+    void usableLoadoutReadsOnlyEquippedSkills() throws Exception {
+        UUID playerId = UUID.randomUUID();
+        try (DivineRepository repository = new DivineRepository(tempDirectory.resolve("loadout.db"))) {
+            ProfileService profiles = new ProfileService(repository, Duration.ofHours(48), Duration.ofDays(7));
+            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            profiles.selectGod(playerId, GodId.ZEUS, Instant.now());
+            skills.grant(playerId, "zeus.chispa_regia");
+            skills.equip(playerId, "zeus.chispa_regia");
+
+            assertEquals(1, skills.equippedUsable(playerId).size());
+            assertEquals("zeus.chispa_regia", skills.equippedUsable(playerId).iterator().next().id());
         }
     }
 }

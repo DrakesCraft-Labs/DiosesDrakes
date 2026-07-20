@@ -24,9 +24,8 @@ public final class PassiveBlessingService {
         if (pvp.inCombat(player, Instant.now())) {
             return;
         }
-        for (SkillDefinition skill : SkillCatalog.all()) {
-            if (skill.type() == SkillType.PASSIVE && skill.god() != GodId.HEPHAESTUS
-                    && skills.isEquippedAndUsable(player.getUniqueId(), skill.id())) {
+        for (SkillDefinition skill : skills.equippedUsable(player.getUniqueId())) {
+            if (skill.type() == SkillType.PASSIVE && skill.god() != GodId.HEPHAESTUS) {
                 apply(player, skill);
             }
         }
