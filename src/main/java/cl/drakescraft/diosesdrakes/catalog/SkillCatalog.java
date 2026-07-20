@@ -106,12 +106,54 @@ public final class SkillCatalog {
         add(skills, GodId.TYCHE, "fortuna_menor", SkillType.PASSIVE, "Pequena mejora de recompensa configurada.", 0, 0, 1);
         add(skills, GodId.TYCHE, "segunda_oportunidad", SkillType.ACTIVE, "Reintento limitado de recompensa no critica.", 240, 1, 2);
         add(skills, GodId.TYCHE, "rueda", SkillType.STANCE, "Postura de evento con recompensa acotada.", 240, 30, 3);
+        add(skills, GodId.OCEANUS, "corriente_primordial", SkillType.PASSIVE, "Mejora el desplazamiento y la respiracion en agua.", 0, 0, 1);
+        add(skills, GodId.OCEANUS, "anillo_del_mundo", SkillType.ACTIVE, "Crea una corriente defensiva breve alrededor del jugador.", 150, 8, 2);
+        add(skills, GodId.OCEANUS, "rio_celeste", SkillType.STANCE, "Postura de exploracion marina con recuperacion limitada.", 210, 30, 3);
+        add(skills, GodId.COEUS, "eje_celeste", SkillType.PASSIVE, "Mantiene la orientacion y la vision en exploracion nocturna.", 0, 0, 1);
+        add(skills, GodId.COEUS, "consulta_del_polo", SkillType.ACTIVE, "Entrega coordenadas y direccion segura sin revelar jugadores.", 120, 1, 2);
+        add(skills, GodId.COEUS, "cartografia_astral", SkillType.STANCE, "Postura de navegacion que reduce riesgos de exploracion.", 180, 30, 3);
+        add(skills, GodId.CRIUS, "pastor_de_estrellas", SkillType.PASSIVE, "Mejora la movilidad durante la noche.", 0, 0, 1);
+        add(skills, GodId.CRIUS, "constelacion", SkillType.ACTIVE, "Concede un salto lunar temporal fuera de combate.", 150, 8, 2);
+        add(skills, GodId.CRIUS, "estacion", SkillType.STANCE, "Postura nocturna de resistencia para viajes largos.", 210, 30, 3);
+        add(skills, GodId.HYPERION, "vigilia_del_sol", SkillType.PASSIVE, "Mejora la vision y recuperacion durante el dia.", 0, 0, 1);
+        add(skills, GodId.HYPERION, "alba", SkillType.ACTIVE, "Disipa oscuridad y aplica brillo temporal al invocador.", 150, 10, 2);
+        add(skills, GodId.HYPERION, "cenit", SkillType.STANCE, "Postura solar de resistencia ambiental limitada.", 210, 30, 3);
+        add(skills, GodId.IAPETUS, "temple_mortal", SkillType.PASSIVE, "Reduce dano ambiental moderado fuera de PvP.", 0, 0, 1);
+        add(skills, GodId.IAPETUS, "prevision", SkillType.ACTIVE, "Entrega caida lenta y resistencia breve ante un viaje riesgoso.", 180, 8, 2);
+        add(skills, GodId.IAPETUS, "legado", SkillType.STANCE, "Postura de supervivencia que mejora la recuperacion propia.", 240, 30, 3);
+        add(skills, GodId.CRONUS, "ritmo_antiguo", SkillType.PASSIVE, "Acelera la recuperacion natural sin alterar el tiempo del mundo.", 0, 0, 1);
+        add(skills, GodId.CRONUS, "instante_robado", SkillType.ACTIVE, "Otorga velocidad corta, con caida lenta y sin teletransporte.", 210, 6, 2);
+        add(skills, GodId.CRONUS, "edad_dorada", SkillType.STANCE, "Postura de descanso que reduce desgaste ambiental.", 300, 30, 3);
+        add(skills, GodId.THEIA, "vista_divina", SkillType.PASSIVE, "Reduce ceguera y mejora vision en entornos oscuros.", 0, 0, 1);
+        add(skills, GodId.THEIA, "refraccion", SkillType.ACTIVE, "Marca una ruta inmediata con luz de cliente temporal.", 150, 8, 2);
+        add(skills, GodId.THEIA, "resplandor", SkillType.STANCE, "Postura de vision y resistencia luminosa controlada.", 210, 30, 3);
+        add(skills, GodId.RHEA, "madre_salvaje", SkillType.PASSIVE, "Mejora la regeneracion fuera de combate.", 0, 0, 1);
+        add(skills, GodId.RHEA, "amparo", SkillType.ACTIVE, "Entrega absorcion breve sin afectar a otros jugadores.", 180, 10, 2);
+        add(skills, GodId.RHEA, "montana_viva", SkillType.STANCE, "Postura terrestre de resistencia y estabilidad.", 240, 30, 3);
+        add(skills, GodId.THEMIS, "orden_sagrado", SkillType.PASSIVE, "Reduce efectos negativos de corta duracion.", 0, 0, 1);
+        add(skills, GodId.THEMIS, "decreto", SkillType.ACTIVE, "Limpia un efecto negativo permitido del propio jugador.", 180, 1, 2);
+        add(skills, GodId.THEMIS, "balanza_cosmica", SkillType.STANCE, "Postura defensiva que no altera PvP normal.", 240, 30, 3);
+        add(skills, GodId.MNEMOSYNE, "memoria_perenne", SkillType.PASSIVE, "Mejora la conservacion de experiencia mediante reglas configuradas.", 0, 0, 1);
+        add(skills, GodId.MNEMOSYNE, "recuerdo", SkillType.ACTIVE, "Muestra informacion de la ubicacion actual sin leer inventarios ajenos.", 150, 1, 2);
+        add(skills, GodId.MNEMOSYNE, "musa", SkillType.STANCE, "Postura de concentracion con recuperacion de mana configurada.", 210, 30, 3);
+        add(skills, GodId.PHOEBE, "oraculo_antiguo", SkillType.PASSIVE, "Mejora vision nocturna y resistencia a oscuridad.", 0, 0, 1);
+        add(skills, GodId.PHOEBE, "augurio", SkillType.ACTIVE, "Entrega una pista de exploracion sin revelar recursos ni jugadores.", 150, 1, 2);
+        add(skills, GodId.PHOEBE, "santuario", SkillType.STANCE, "Postura lunar de proteccion personal fuera de PvP.", 210, 30, 3);
+        add(skills, GodId.TETHYS, "fuente_nutricia", SkillType.PASSIVE, "Mejora respiracion y recuperacion al estar en agua.", 0, 0, 1);
+        add(skills, GodId.TETHYS, "manantial", SkillType.ACTIVE, "Restaura hambre limitada y limpia efectos de calor propios.", 180, 1, 2);
+        add(skills, GodId.TETHYS, "cauce", SkillType.STANCE, "Postura acuatica de movilidad y resistencia ambiental.", 240, 30, 3);
         return List.copyOf(skills);
     }
 
     private static void add(List<SkillDefinition> skills, GodId god, String suffix, SkillType type,
                             String description, int cooldown, int duration, int tier) {
-        add(skills, god, suffix, type, description, cooldown, duration, tier, 0, List.of());
+        List<String> prerequisites = skills.stream()
+                .filter(skill -> skill.god() == god && skill.tier() == tier - 1)
+                .reduce((first, second) -> second)
+                .map(SkillDefinition::id)
+                .map(List::of)
+                .orElseGet(List::of);
+        add(skills, god, suffix, type, description, cooldown, duration, tier, defaultCost(tier), prerequisites);
     }
 
     private static void add(List<SkillDefinition> skills, GodId god, String suffix, SkillType type,
@@ -123,5 +165,13 @@ public final class SkillCatalog {
 
     private static String title(String id) {
         return id.replace('_', ' ');
+    }
+
+    private static double defaultCost(int tier) {
+        return switch (tier) {
+            case 1 -> 1200;
+            case 2 -> 2800;
+            default -> 4500;
+        };
     }
 }

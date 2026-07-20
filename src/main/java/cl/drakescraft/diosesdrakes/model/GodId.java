@@ -9,7 +9,10 @@ public enum GodId {
     APHRODITE("Afrodita"), HEPHAESTUS("Hefesto"), HERMES("Hermes"), HESTIA("Hestia"),
     HADES("Hades"), PERSEPHONE("Persefone"), HECATE("Hecate"), DIONYSUS("Dionisio"),
     EROS("Eros"), NIKE("Nike"), NEMESIS("Nemesis"), MORPHEUS("Morfeo"),
-    HELIOS("Helios"), SELENE("Selene"), TYCHE("Tique");
+    HELIOS("Helios"), SELENE("Selene"), TYCHE("Tique"),
+    OCEANUS("Oceano"), COEUS("Ceo"), CRIUS("Crio"), HYPERION("Hiperion"),
+    IAPETUS("Japeto"), CRONUS("Cronos"), THEIA("Tea"), RHEA("Rea"),
+    THEMIS("Temis"), MNEMOSYNE("Mnemosine"), PHOEBE("Febe"), TETHYS("Tetis");
 
     private final String displayName;
 
@@ -19,6 +22,10 @@ public enum GodId {
 
     public String displayName() {
         return displayName;
+    }
+
+    public boolean isTitan() {
+        return ordinal() >= OCEANUS.ordinal();
     }
 
     public static Optional<GodId> fromStorage(String value) {

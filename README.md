@@ -39,10 +39,15 @@ El proyecto contempla olimpicos y dioses secundarios: Zeus, Hera, Poseidon,
 Demeter, Atenea, Apolo, Artemisa, Ares, Afrodita, Hefesto, Hermes, Hestia, Hades,
 Persefone, Hecate, Dionisio, Eros, Nike, Nemesis, Morfeo, Helios, Selene y Tique.
 
-Se implementan **uno por uno**. Cada dios se publica con su arbol, costos,
-restricciones, documentacion y prueba de balance antes de avanzar al siguiente.
+Tambien incorpora a los doce Titanes del canon de Urano y Gea: Oceano, Ceo, Crio,
+Hiperion, Japeto, Cronos, Tea, Rea, Temis, Mnemosine, Febe y Tetis. Consulta
+[el canon jugable](docs/PANTEON.md) para sus ramas, limites y fuentes.
 
-El catalogo inicial ya define tres bendiciones por dios: una pasiva, una activa
+Todo el panteon inicial dispone de una rama base de tres nodos con costos,
+restricciones y controles comunes. Las subramas especializadas e integraciones de
+alto impacto se publican uno por uno, con pruebas y balance antes de avanzar.
+
+El catalogo inicial define tres bendiciones por patron: una pasiva, una activa
 con cooldown y una postura temporal. La carga final del jugador se limita a dos
 pasivas, dos activas y una postura; tener un poder desbloqueado no significa que
 pueda permanecer activo al mismo tiempo que todos los demas.

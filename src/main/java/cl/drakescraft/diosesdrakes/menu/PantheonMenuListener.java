@@ -1,11 +1,9 @@
 package cl.drakescraft.diosesdrakes.menu;
 
 import cl.drakescraft.diosesdrakes.model.GodId;
+import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
-import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
-import cl.drakescraft.diosesdrakes.model.SkillDefinition;
-import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -13,6 +11,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 
 import java.time.Instant;
 
+/** Handles generic patron selection and the active patron's branch without hard-coded gods. */
 public final class PantheonMenuListener implements Listener {
     private final ProfileService profiles;
     private final SkillService skills;
@@ -26,48 +25,51 @@ public final class PantheonMenuListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getView().getTopInventory().getHolder() instanceof PantheonMenuHolder) {
-            event.setCancelled(true);
-            if (!(event.getWhoClicked() instanceof org.bukkit.entity.Player player)) {
-                return;
-            }
-            if (event.getRawSlot() >= 12 && event.getRawSlot() <= 14) {
-                toggleHephaestusSkill(player, event.getRawSlot());
-                return;
-            }
-            if (event.getRawSlot() != 11) {
-                return;
-            }
-            try {
-                profiles.selectGod(player.getUniqueId(), GodId.HEPHAESTUS, Instant.now());
-                player.sendMessage("Hefesto ha aceptado tu ofrenda. Tu progreso industrial ha comenzado.");
-                PantheonMenu.open(player, profiles, skills);
-            } catch (IllegalStateException exception) {
-                player.sendMessage(exception.getMessage());
-            } catch (Exception exception) {
-                player.sendMessage("No se pudo seleccionar a Hefesto. El staff debe revisar la base divina.");
-            }
+        if (!(event.getView().getTopInventory().getHolder() instanceof PantheonMenuHolder holder)) {
+            return;
+        }
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof org.bukkit.entity.Player player) || event.getRawSlot() < 0) {
+            return;
+        }
+        if (holder.view() == PantheonMenuHolder.View.SELECTION) {
+            chooseGod(player, event.getRawSlot());
+            return;
+        }
+        String skillId = holder.skillAt(event.getRawSlot());
+        if (skillId != null) {
+            toggleSkill(player, skillId);
         }
     }
 
-    private void toggleHephaestusSkill(org.bukkit.entity.Player player, int slot) {
-        SkillDefinition skill = SkillCatalog.forGod(GodId.HEPHAESTUS).stream().skip(slot - 12L).findFirst().orElse(null);
-        if (skill == null) {
+    private void chooseGod(org.bukkit.entity.Player player, int slot) {
+        GodId[] gods = GodId.values();
+        if (slot < 0 || slot >= gods.length) {
             return;
         }
         try {
-            if (!skills.isUnlocked(player.getUniqueId(), skill.id())) {
-                SkillService.PurchaseResult result = skills.purchase(player, skill.id(), transactions);
+            GodId god = gods[slot];
+            profiles.selectGod(player.getUniqueId(), god, Instant.now());
+            player.sendMessage(god.displayName() + " ha aceptado tu ofrenda. Tu senda ha comenzado.");
+            PantheonMenu.open(player, profiles, skills);
+        } catch (IllegalStateException exception) {
+            player.sendMessage(exception.getMessage());
+        } catch (Exception exception) {
+            player.sendMessage("No se pudo seleccionar el patron. El staff debe revisar la base divina.");
+        }
+    }
+
+    private void toggleSkill(org.bukkit.entity.Player player, String skillId) {
+        try {
+            if (!skills.isUnlocked(player.getUniqueId(), skillId)) {
+                SkillService.PurchaseResult result = skills.purchase(player, skillId, transactions);
                 player.sendMessage("[Dioses] " + result.message());
-                PantheonMenu.open(player, profiles, skills);
-                return;
-            }
-            if (skills.equipped(player.getUniqueId()).contains(skill.id())) {
-                skills.unequip(player.getUniqueId(), skill.id());
-                player.sendMessage("Bendicion desequipada: " + skill.name() + ".");
+            } else if (skills.equipped(player.getUniqueId()).contains(skillId)) {
+                skills.unequip(player.getUniqueId(), skillId);
+                player.sendMessage("Bendicion desequipada: " + skillId + ".");
             } else {
-                skills.equip(player.getUniqueId(), skill.id());
-                player.sendMessage("Bendicion equipada: " + skill.name() + ".");
+                skills.equip(player.getUniqueId(), skillId);
+                player.sendMessage("Bendicion equipada: " + skillId + ".");
             }
             PantheonMenu.open(player, profiles, skills);
         } catch (Exception exception) {

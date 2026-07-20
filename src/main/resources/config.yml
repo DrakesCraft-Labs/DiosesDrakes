@@ -6,6 +6,7 @@ economy:
     enabled: true
     grace-hours: 24
     check-minutes: 5
+    default-cost: 1500.0
     costs:
       hephaestus: 1500.0
   treasury:

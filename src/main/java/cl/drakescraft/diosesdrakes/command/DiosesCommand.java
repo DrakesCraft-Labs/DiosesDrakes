@@ -7,7 +7,7 @@ import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
-import cl.drakescraft.diosesdrakes.service.HephaestusAbilityService;
+import cl.drakescraft.diosesdrakes.service.GenericDivineAbilityService;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,14 +22,14 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     private final ProfileService profiles;
     private final SkillService skills;
     private final DivineTransactionService transactions;
-    private final HephaestusAbilityService hephaestus;
+    private final GenericDivineAbilityService abilities;
 
     public DiosesCommand(ProfileService profiles, SkillService skills, DivineTransactionService transactions,
-                         HephaestusAbilityService hephaestus) {
+                         GenericDivineAbilityService abilities) {
         this.profiles = profiles;
         this.skills = skills;
         this.transactions = transactions;
-        this.hephaestus = hephaestus;
+        this.abilities = abilities;
     }
 
     @Override
@@ -138,7 +138,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     }
 
     private void use(Player player, String skillId) {
-        HephaestusAbilityService.UseResult result = hephaestus.use(player, skillId.toLowerCase(java.util.Locale.ROOT));
+        GenericDivineAbilityService.UseResult result = abilities.use(player, skillId.toLowerCase(java.util.Locale.ROOT));
         player.sendMessage("[Dioses] " + result.message());
     }
 

@@ -13,6 +13,9 @@ import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.CooldownService;
 import cl.drakescraft.diosesdrakes.service.DivineAbilityAuditLogger;
 import cl.drakescraft.diosesdrakes.service.HephaestusAbilityService;
+import cl.drakescraft.diosesdrakes.service.GenericDivineAbilityService;
+import cl.drakescraft.diosesdrakes.service.PassiveBlessingService;
+import cl.drakescraft.diosesdrakes.service.PvpSafetyGate;
 import cl.drakescraft.diosesdrakes.service.UpkeepService;
 import cl.drakescraft.diosesdrakes.service.VaultEconomyGateway;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
@@ -37,6 +40,9 @@ public final class DiosesDrakes extends JavaPlugin {
     private DivineTransactionService transactions;
     private UpkeepService upkeep;
     private HephaestusAbilityService hephaestus;
+    private GenericDivineAbilityService abilities;
+    private PassiveBlessingService passives;
+    private PvpSafetyGate pvpSafety;
 
     @Override
     public void onEnable() {
@@ -46,7 +52,7 @@ public final class DiosesDrakes extends JavaPlugin {
             return;
         }
 
-        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, hephaestus);
+        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities);
         PluginCommand dioses = getCommand("dioses");
         if (dioses == null) {
             getLogger().severe("No se pudo registrar el comando /dioses.");
@@ -58,9 +64,11 @@ public final class DiosesDrakes extends JavaPlugin {
         dioses.setTabCompleter(command);
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles, skills, transactions), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
+        getServer().getPluginManager().registerEvents(pvpSafety, this);
         getServer().getPluginManager().registerEvents(new UpkeepListener(upkeep), this);
         getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills), this, ServicePriority.Normal);
         scheduleUpkeepChecks();
+        schedulePassiveRefresh();
         getLogger().info("DiosesDrakes core 0.1.0 habilitado con Hefesto.");
     }
 
@@ -123,7 +131,8 @@ public final class DiosesDrakes extends JavaPlugin {
                     transactions,
                     Duration.ofDays(7),
                     Duration.ofHours(getConfig().getLong("economy.weekly-upkeep.grace-hours", 24)),
-                    god -> getConfig().getDouble("economy.weekly-upkeep.costs." + god.name().toLowerCase(), 0)
+                    god -> getConfig().getDouble("economy.weekly-upkeep.costs." + god.name().toLowerCase(),
+                            getConfig().getDouble("economy.weekly-upkeep.default-cost", 1500.0))
             );
         }
         return initializeHephaestus(transactions);
@@ -143,6 +152,9 @@ public final class DiosesDrakes extends JavaPlugin {
                 getConfig().getInt("hephaestus.ojo-de-mena.radius", 8),
                 getConfig().getInt("hephaestus.ojo-de-mena.max-markers", 24)
         );
+        pvpSafety = new PvpSafetyGate();
+        abilities = new GenericDivineAbilityService(skills, hephaestus, pvpSafety);
+        passives = new PassiveBlessingService(skills, pvpSafety);
         if (transactionService == null) {
             getLogger().warning("Economia divina desactivada: los desbloqueos de pago y mantenimiento no se habilitaran.");
         }
@@ -156,5 +168,10 @@ public final class DiosesDrakes extends JavaPlugin {
         long interval = Math.max(1, getConfig().getLong("economy.weekly-upkeep.check-minutes", 5)) * 60L * 20L;
         getServer().getScheduler().runTaskTimer(this, () -> getServer().getOnlinePlayers()
                 .forEach(player -> upkeep.settle(player, Instant.now())), interval, interval);
+    }
+
+    private void schedulePassiveRefresh() {
+        getServer().getScheduler().runTaskTimer(this,
+                () -> getServer().getOnlinePlayers().forEach(passives::refresh), 20L, 100L);
     }
 }
