@@ -57,12 +57,17 @@ masiva.
 
 ## Regla de entrega
 
-Cada rama tiene una pasiva, una activa y una postura iniciales. El motor actual
-aplica efectos autocontenidos de exploracion, movilidad, recuperacion, agua, luz
-o informacion; se bloquean durante combate PvP survival. Esos nodos son la base
-de futuras subramas, no un limite de contenido. Las integraciones de alto impacto
-con Slimefun, AxGraves, bosses u Odysseia se añaden por patron cuando cuenten con
-sus propias listas permitidas y pruebas.
+Cada rama tiene diez nodos: tres pasivas, cuatro activas y tres posturas. Los tres
+primeros fijan la identidad del patron; los siete de ascension se organizan en una
+pasiva mayor, una descarga PvE, vuelo temporal, dominio local, veredicto PvE de
+100 de daño, avatar colosal y una corona pasiva final.
+
+El motor bloquea la rama completa durante combate PvP survival. Las descargas usan
+rayos de efecto sin fuego ni daño de bloque y solo seleccionan criaturas hostiles;
+el veredicto tampoco puede seleccionar jugadores. El vuelo conserva y restituye el
+estado original. Los dominios de tormenta usan clima personal, y los de crecimiento
+solo fertilizan cultivos o saplings en bloques que WorldGuard autorice al jugador.
+PvPDivino será la única arena que habilite poderes de combate entre jugadores.
 
 ## Fuentes de investigacion
 

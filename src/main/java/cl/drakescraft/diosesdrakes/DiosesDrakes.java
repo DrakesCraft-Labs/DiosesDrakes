@@ -140,10 +140,11 @@ public final class DiosesDrakes extends JavaPlugin {
     }
 
     private boolean initializeHephaestus(DivineTransactionService transactionService) {
+        ProtectionGate protectionGate = new ProtectionGate(getServer().getPluginManager());
         hephaestus = new HephaestusAbilityService(
                 this,
                 skills,
-                new ProtectionGate(getServer().getPluginManager()),
+                protectionGate,
                 new SlimefunEnergyBridge(new HashSet<>(getConfig().getStringList("integrations.slimefun.pulso-de-red.allowed-item-ids"))),
                 new DivineAbilityAuditLogger(getDataFolder().toPath().resolve("audit")),
                 getConfig().getInt("integrations.slimefun.pulso-de-red.radius", 6),
@@ -154,7 +155,7 @@ public final class DiosesDrakes extends JavaPlugin {
                 getConfig().getInt("hephaestus.ojo-de-mena.max-markers", 24)
         );
         pvpSafety = new PvpSafetyGate();
-        abilities = new GenericDivineAbilityService(skills, hephaestus, pvpSafety);
+        abilities = new GenericDivineAbilityService(this, skills, hephaestus, pvpSafety, protectionGate);
         passives = new PassiveBlessingService(skills, pvpSafety);
         if (transactionService == null) {
             getLogger().warning("Economia divina desactivada: los desbloqueos de pago y mantenimiento no se habilitaran.");

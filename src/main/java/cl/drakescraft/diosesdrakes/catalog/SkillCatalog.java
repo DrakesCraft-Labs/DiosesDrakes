@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Initial data-driven catalog. Effects are activated only after their adapters are implemented. */
+/** Data-driven pantheon. Every patron has a ten-node path with real effect families. */
 public final class SkillCatalog {
     private static final Map<String, SkillDefinition> BY_ID = build().stream()
             .collect(Collectors.toUnmodifiableMap(SkillDefinition::id, Function.identity()));
@@ -142,7 +142,44 @@ public final class SkillCatalog {
         add(skills, GodId.TETHYS, "fuente_nutricia", SkillType.PASSIVE, "Mejora respiracion y recuperacion al estar en agua.", 0, 0, 1);
         add(skills, GodId.TETHYS, "manantial", SkillType.ACTIVE, "Restaura hambre limitada y limpia efectos de calor propios.", 180, 1, 2);
         add(skills, GodId.TETHYS, "cauce", SkillType.STANCE, "Postura acuatica de movilidad y resistencia ambiental.", 240, 30, 3);
+        expandEveryBranch(skills);
         return List.copyOf(skills);
+    }
+
+    /** Adds the seven ascension nodes shared structurally by all patrons, with themed identities. */
+    private static void expandEveryBranch(List<SkillDefinition> skills) {
+        for (GodId god : GodId.values()) {
+            PathTheme theme = themeFor(god);
+            add(skills, god, "ascension_" + theme.passive(), SkillType.PASSIVE,
+                    "Legado " + theme.label() + ": una bendicion mayor equipada que refuerza tu afinidad.", 0, 0, 4);
+            add(skills, god, "ascension_" + theme.strike(), SkillType.ACTIVE,
+                    "Descarga " + theme.label() + " sobre criaturas cercanas. Nunca dana jugadores fuera de PvPDivino.", 150, 1, 5);
+            add(skills, god, "ascension_" + theme.flight(), SkillType.ACTIVE,
+                    "Ascenso " + theme.label() + ": vuelo breve, impulso y caida segura fuera de combate.", 240, 10, 6);
+            add(skills, god, "ascension_" + theme.domain(), SkillType.STANCE,
+                    "Dominio " + theme.label() + ": altera solo tu experiencia local y respeta claims y protecciones.", 300, 20, 7);
+            add(skills, god, "ascension_" + theme.execution(), SkillType.ACTIVE,
+                    "Veredicto " + theme.label() + ": golpe de 100 de dano contra una criatura, nunca contra jugadores.", 480, 1, 8);
+            add(skills, god, "ascension_" + theme.avatar(), SkillType.STANCE,
+                    "Avatar " + theme.label() + ": forma colosal temporal, resistencia y presencia visible.", 600, 18, 9);
+            add(skills, god, "ascension_" + theme.capstone(), SkillType.PASSIVE,
+                    "Corona " + theme.label() + ": pasiva final que potencia tu especialidad mientras este equipada.", 0, 0, 10);
+        }
+    }
+
+    /** Maps mythology to the effect family used by the runtime executor. */
+    private static PathTheme themeFor(GodId god) {
+        return switch (god) {
+            case ZEUS, ARES, NIKE, NEMESIS -> new PathTheme("del trueno", "corona_tonante", "lanza_del_cielo", "paso_del_rayo", "tempestad_personal", "veredicto_del_olimpo", "avatar_tonante", "trono_electrico");
+            case POSEIDON, OCEANUS, TETHYS -> new PathTheme("de la marea", "pulmon_abismal", "tridente_de_ola", "salto_de_marea", "reino_de_lluvia", "veredicto_abismal", "avatar_del_mar", "corona_de_coral");
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA -> new PathTheme("del florecimiento", "raiz_perenne", "espina_viviente", "salto_de_brote", "jardin_sagrado", "veredicto_de_raiz", "avatar_verdante", "corona_de_la_cosecha");
+            case HERMES, ARTEMIS, SELENE, CRIUS -> new PathTheme("del viento", "sendero_alado", "flecha_de_viento", "vuelo_del_mensajero", "cielo_personal", "veredicto_del_cazador", "avatar_alado", "corona_del_viajero");
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE -> new PathTheme("de la luz", "vista_inmortal", "rayo_solar", "ascenso_del_amanecer", "halo_personal", "veredicto_solar", "avatar_radiante", "corona_del_mediodia");
+            case HADES, HECATE, MORPHEUS -> new PathTheme("de la sombra", "velo_perenne", "lanza_estigia", "ascenso_espectral", "niebla_personal", "veredicto_estigio", "avatar_del_inframundo", "corona_de_ceniza");
+            case ATHENA, HERA, COEUS, THEMIS, MNEMOSYNE -> new PathTheme("del juicio", "mente_inmortal", "decreto_divino", "paso_tactico", "santuario_personal", "veredicto_de_la_ley", "avatar_de_marfil", "corona_del_consejo");
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> new PathTheme("de la forja", "corazon_de_brasa", "martillo_celeste", "salto_de_ascua", "forja_personal", "veredicto_de_acero", "avatar_de_bronce", "corona_del_yunque");
+            case APHRODITE, EROS, TYCHE -> new PathTheme("del encanto", "aura_favorable", "onda_de_gracia", "paso_afortunado", "jardin_de_gracia", "veredicto_del_destino", "avatar_de_rosa", "corona_de_la_fortuna");
+        };
     }
 
     private static void add(List<SkillDefinition> skills, GodId god, String suffix, SkillType type,
@@ -171,7 +208,18 @@ public final class SkillCatalog {
         return switch (tier) {
             case 1 -> 1200;
             case 2 -> 2800;
-            default -> 4500;
+            case 3 -> 4500;
+            case 4 -> 6500;
+            case 5 -> 8500;
+            case 6 -> 12000;
+            case 7 -> 16000;
+            case 8 -> 22000;
+            case 9 -> 30000;
+            default -> 42000;
         };
+    }
+
+    private record PathTheme(String label, String passive, String strike, String flight, String domain,
+                             String execution, String avatar, String capstone) {
     }
 }

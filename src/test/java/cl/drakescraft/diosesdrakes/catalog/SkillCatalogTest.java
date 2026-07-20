@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SkillCatalogTest {
     @Test
-    void everyInitialGodHasSeveralDocumentedSkills() {
+    void everyGodAndTitanHasATenNodeProgression() {
         for (GodId god : GodId.values()) {
-            assertTrue(SkillCatalog.forGod(god).size() >= 3, god + " needs several skills");
+            assertEquals(10, SkillCatalog.forGod(god).size(), god + " needs a ten-node path");
         }
     }
 
@@ -21,6 +21,18 @@ class SkillCatalogTest {
                 .filter(skill -> skill.type() == SkillType.ACTIVE)
                 .filter(skill -> skill.cooldownSeconds() <= 0)
                 .count());
+    }
+
+    @Test
+    void everyBranchHasAControlledActivePassiveAndStanceLoadout() {
+        for (GodId god : GodId.values()) {
+            var branch = SkillCatalog.forGod(god);
+            assertEquals(3, branch.stream().filter(skill -> skill.type() == SkillType.PASSIVE).count());
+            assertEquals(4, branch.stream().filter(skill -> skill.type() == SkillType.ACTIVE).count());
+            assertEquals(3, branch.stream().filter(skill -> skill.type() == SkillType.STANCE).count());
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 8 && skill.cooldownSeconds() >= 480));
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 9 && skill.durationSeconds() > 0));
+        }
     }
 
     @Test
@@ -43,7 +55,7 @@ class SkillCatalogTest {
         assertEquals(12, titans.size());
         for (GodId titan : titans) {
             var branch = SkillCatalog.forGod(titan);
-            assertEquals(3, branch.size(), titan + " needs an initial three-node branch");
+            assertEquals(10, branch.size(), titan + " needs a complete ten-node branch");
             assertTrue(branch.stream().allMatch(skill -> skill.unlockCost() > 0));
             assertTrue(branch.stream().filter(skill -> skill.tier() > 1).allMatch(skill -> !skill.prerequisites().isEmpty()));
         }

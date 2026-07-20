@@ -6,8 +6,8 @@ Progresion divina y drenajes economicos para **DrakesCraft**. Cada jugador invie
 en un dios, desbloquea poderes utiles y mantiene sus bendiciones activas mediante
 dinero, ofrendas y juego real.
 
-> Estado: **Hefesto** es el primer dios jugable. Los demas dioses siguen en
-> diseno y no conceden efectos hasta que cada rama tenga pruebas y balance.
+> Estado: el panteon completo tiene ramas de diez nodos. Las habilidades se
+> sujetan a carga equipada, enfriamientos, costes y protecciones.
 
 ## Que resuelve
 
@@ -43,14 +43,10 @@ Tambien incorpora a los doce Titanes del canon de Urano y Gea: Oceano, Ceo, Crio
 Hiperion, Japeto, Cronos, Tea, Rea, Temis, Mnemosine, Febe y Tetis. Consulta
 [el canon jugable](docs/PANTEON.md) para sus ramas, limites y fuentes.
 
-Todo el panteon inicial dispone de una rama base de tres nodos con costos,
-restricciones y controles comunes. Las subramas especializadas e integraciones de
-alto impacto se publican uno por uno, con pruebas y balance antes de avanzar.
-
-El catalogo inicial define tres bendiciones por patron: una pasiva, una activa
-con cooldown y una postura temporal. La carga final del jugador se limita a dos
-pasivas, dos activas y una postura; tener un poder desbloqueado no significa que
-pueda permanecer activo al mismo tiempo que todos los demas.
+Cada patron dispone de diez nodos encadenados: tres **pasivas equipables**, cuatro
+**activas** y tres **posturas temporales**. La carga final se limita a dos pasivas,
+dos activas y una postura; desbloquear toda una rama no permite llevar todos los
+poderes al mismo tiempo.
 
 ## Reglas de progreso
 
@@ -100,14 +96,14 @@ divina tiene partículas, color y sonido propios; Hefesto además muestra la ene
 que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
 su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
 
-## Árbol inicial
+## Árbol divino
 
-Cada patron empieza con tres nodos encadenados: una **pasiva equipada**, una
-**activa con recarga** y una **postura temporal**. Los costes iniciales son 1.200,
-2.800 y 4.500 Dragmas. El catálogo tiene 23 dioses olímpicos y menores, más 12
-titanes; sus ramas iniciales suman 105 nodos documentados en
-[`docs/PANTEON.md`](docs/PANTEON.md). Las expansiones se implementan patron por
-patron con mecánicas reales, no como nodos de relleno.
+Los 23 dioses y 12 titanes suman **350 habilidades**. Los hitos de ascensión son
+mecánicas reales: descargas sin daño de bloque, vuelo temporal con restitución
+segura, dominios personales de clima, crecimiento de cultivos y saplings dentro de
+claims autorizados, veredictos PvE de 100 de daño y avatares colosales temporales.
+Nada de esto puede golpear jugadores en survival normal; PvPDivino mantiene su
+propio control regional.
 
 La referencia jugable para la comunidad se publica en
 `https://web.drakescraft.cl/dioses.html`. Al cambiar `SkillCatalog`, actualiza la

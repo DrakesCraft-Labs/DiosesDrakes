@@ -27,12 +27,14 @@ public final class PassiveBlessingService {
         for (SkillDefinition skill : SkillCatalog.all()) {
             if (skill.type() == SkillType.PASSIVE && skill.god() != GodId.HEPHAESTUS
                     && skills.isEquippedAndUsable(player.getUniqueId(), skill.id())) {
-                apply(player, skill.god());
+                apply(player, skill);
             }
         }
     }
 
-    private void apply(Player player, GodId god) {
+    /** Refreshes the equipped passive without leaving a permanent effect after it is unequipped. */
+    private void apply(Player player, SkillDefinition skill) {
+        GodId god = skill.god();
         PotionEffectType type = switch (god) {
             case POSEIDON, OCEANUS, TETHYS -> PotionEffectType.WATER_BREATHING;
             case ZEUS, HERA, ATHENA, ARES, IAPETUS, RHEA, THEMIS -> PotionEffectType.RESISTANCE;
@@ -44,6 +46,7 @@ public final class PassiveBlessingService {
             case APHRODITE, EROS, NIKE, NEMESIS, TYCHE -> PotionEffectType.LUCK;
             default -> PotionEffectType.REGENERATION;
         };
-        player.addPotionEffect(new PotionEffect(type, 160, 0, true, false, true));
+        int amplifier = skill.tier() >= 10 ? 2 : skill.tier() >= 4 ? 1 : 0;
+        player.addPotionEffect(new PotionEffect(type, 160, amplifier, true, false, true));
     }
 }

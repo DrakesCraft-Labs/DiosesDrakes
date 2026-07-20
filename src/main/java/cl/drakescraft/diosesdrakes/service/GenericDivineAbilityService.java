@@ -1,41 +1,61 @@
 package cl.drakescraft.diosesdrakes.service;
 
 import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
+import cl.drakescraft.diosesdrakes.integration.ProtectionGate;
 import cl.drakescraft.diosesdrakes.model.GodId;
 import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.model.SkillType;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Sound;
 import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.WeatherType;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-/** Executes safe shared effect families for every non-Hefesto active or stance. */
+/** Executes survival-safe divine powers. World mutation is always gated by the player's protections. */
 public final class GenericDivineAbilityService {
+    private final JavaPlugin plugin;
     private final SkillService skills;
     private final HephaestusAbilityService hephaestus;
     private final PvpSafetyGate pvp;
+    private final ProtectionGate protections;
+    private final Map<UUID, FlightState> flights = new HashMap<>();
+    private final Map<UUID, AvatarState> avatars = new HashMap<>();
 
-    public GenericDivineAbilityService(SkillService skills, HephaestusAbilityService hephaestus, PvpSafetyGate pvp) {
+    public GenericDivineAbilityService(JavaPlugin plugin, SkillService skills, HephaestusAbilityService hephaestus,
+                                       PvpSafetyGate pvp, ProtectionGate protections) {
+        this.plugin = plugin;
         this.skills = skills;
         this.hephaestus = hephaestus;
         this.pvp = pvp;
+        this.protections = protections;
     }
 
+    /** Authorizes the skill first, then routes it to its real effect family. */
     public UseResult use(Player player, String skillId) {
         SkillDefinition skill = SkillCatalog.find(skillId).orElse(null);
         if (skill == null) {
             return UseResult.denied("No existe esa habilidad.");
         }
-        if (skill.god() == GodId.HEPHAESTUS) {
+        if (skill.id().equals(HephaestusAbilityService.NETWORK_PULSE) || skill.id().equals(HephaestusAbilityService.ORE_SIGHT)) {
             HephaestusAbilityService.UseResult result = hephaestus.use(player, skillId);
             return new UseResult(result.started(), result.message());
         }
@@ -55,32 +75,216 @@ public final class GenericDivineAbilityService {
         return UseResult.started(skill.name() + " activo durante " + activation.durationSeconds() + " segundos.");
     }
 
+    /** Preserves the early branches while turning tiers four through nine into distinct power milestones. */
     private void apply(Player player, SkillDefinition skill, int seconds) {
+        if (skill.tier() >= 4) {
+            applyAscension(player, skill, seconds);
+            return;
+        }
         switch (skill.god()) {
-            case POSEIDON, OCEANUS, TETHYS -> effects(player, seconds, PotionEffectType.WATER_BREATHING, PotionEffectType.DOLPHINS_GRACE);
-            case ZEUS, HERMES, CRIUS, CRONUS, SELENE -> effects(player, seconds, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
-            case APOLLO, HELIOS, HYPERION, THEIA -> effects(player, seconds, PotionEffectType.NIGHT_VISION, PotionEffectType.FIRE_RESISTANCE);
-            case HESTIA, HADES, PERSEPHONE -> effects(player, seconds, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.RESISTANCE);
-            case DEMETER, RHEA, DIONYSUS -> effects(player, seconds, PotionEffectType.REGENERATION, PotionEffectType.SATURATION);
-            case HERA, ATHENA, ARES, IAPETUS, THEMIS, PHOEBE -> effects(player, seconds, PotionEffectType.RESISTANCE, PotionEffectType.ABSORPTION);
+            case POSEIDON, OCEANUS, TETHYS -> effects(player, seconds, 0, PotionEffectType.WATER_BREATHING, PotionEffectType.DOLPHINS_GRACE);
+            case ZEUS, HERMES, CRIUS, CRONUS, SELENE -> effects(player, seconds, 0, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
+            case APOLLO, HELIOS, HYPERION, THEIA -> effects(player, seconds, 0, PotionEffectType.NIGHT_VISION, PotionEffectType.FIRE_RESISTANCE);
+            case HESTIA, HADES, PERSEPHONE -> effects(player, seconds, 0, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.RESISTANCE);
+            case DEMETER, RHEA, DIONYSUS -> effects(player, seconds, 0, PotionEffectType.REGENERATION, PotionEffectType.SATURATION);
+            case HERA, ATHENA, ARES, IAPETUS, THEMIS, PHOEBE -> effects(player, seconds, 0, PotionEffectType.RESISTANCE, PotionEffectType.ABSORPTION);
             case ARTEMIS -> trackNearestMonster(player);
             case APHRODITE -> calmNearbyMonsters(player);
-            case HECATE, MORPHEUS -> effects(player, seconds, PotionEffectType.INVISIBILITY, PotionEffectType.NIGHT_VISION);
-            case EROS, NIKE, NEMESIS, TYCHE -> effects(player, seconds, PotionEffectType.LUCK, PotionEffectType.REGENERATION);
+            case HECATE, MORPHEUS -> effects(player, seconds, 0, PotionEffectType.INVISIBILITY, PotionEffectType.NIGHT_VISION);
+            case EROS, NIKE, NEMESIS, TYCHE -> effects(player, seconds, 0, PotionEffectType.LUCK, PotionEffectType.REGENERATION);
             case COEUS -> showCoordinates(player);
             case MNEMOSYNE -> showLocationMemory(player);
-            default -> effects(player, seconds, PotionEffectType.REGENERATION);
+            default -> effects(player, seconds, 0, PotionEffectType.REGENERATION);
         }
-
         if (skill.id().equals("hermes.ascenso_de_icaro")) {
-            effects(player, Math.min(seconds, 4), PotionEffectType.LEVITATION, PotionEffectType.SLOW_FALLING);
+            grantFlight(player, Math.min(seconds, 4));
         }
     }
 
-    private void effects(Player player, int seconds, PotionEffectType... types) {
-        for (PotionEffectType type : types) {
-            player.addPotionEffect(new PotionEffect(type, seconds * 20, 0, true, true, true));
+    /** Runs the endgame tiers: strike, travel, domain, execution and avatar. */
+    private void applyAscension(Player player, SkillDefinition skill, int seconds) {
+        switch (skill.tier()) {
+            case 5 -> strikeCreature(player, skill.god(), 24.0D);
+            case 6 -> grantFlight(player, seconds);
+            case 7 -> establishDomain(player, skill.god(), seconds);
+            case 8 -> strikeCreature(player, skill.god(), 100.0D);
+            case 9 -> becomeAvatar(player, skill.god(), seconds);
+            default -> effects(player, Math.max(8, seconds), 1, primaryEffect(skill.god()));
         }
+    }
+
+    /** Uses an effect-only lightning strike so it cannot ignite terrain or damage another player. */
+    private void strikeCreature(Player player, GodId god, double damage) {
+        Monster target = player.getWorld().getNearbyEntities(player.getLocation(), 14, 9, 14,
+                        entity -> entity instanceof Monster)
+                .stream().map(entity -> (Monster) entity)
+                .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(player.getLocation())))
+                .orElse(null);
+        if (target == null) {
+            player.sendActionBar(Component.text("El poder busca una criatura hostil cercana."));
+            return;
+        }
+        target.getWorld().strikeLightningEffect(target.getLocation());
+        target.damage(damage, player);
+        target.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, target.getLocation().add(0, 1, 0), 32,
+                0.55, 0.85, 0.55, 0.14);
+        player.sendActionBar(Component.text(damage >= 100 ? "Veredicto divino: 100 de dano PvE." : "Descarga divina sobre " + target.getType() + "."));
+    }
+
+    /** Grants a timed flight state and restores exactly the player's former flight permissions afterwards. */
+    private void grantFlight(Player player, int seconds) {
+        FlightState previous = flights.remove(player.getUniqueId());
+        if (previous != null) {
+            previous.task().cancel();
+            restoreFlight(player, previous);
+        }
+        boolean allowed = player.getAllowFlight();
+        boolean flying = player.isFlying();
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        effects(player, seconds + 4, 4, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
+        BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            FlightState state = flights.remove(player.getUniqueId());
+            if (state == null || !player.isOnline()) {
+                return;
+            }
+            restoreFlight(player, state);
+        }, Math.max(1, seconds) * 20L);
+        flights.put(player.getUniqueId(), new FlightState(allowed, flying, player.getGameMode(), task));
+    }
+
+    /** Restores flight only when the game mode has not changed underneath the temporary ability. */
+    private void restoreFlight(Player player, FlightState state) {
+        if (player.getGameMode() != state.gameMode()) {
+            return;
+        }
+        player.setFlying(state.wasFlying() && state.wasAllowed());
+        player.setAllowFlight(state.wasAllowed());
+    }
+
+    /** Applies a god-specific local domain without changing the global world weather or bypassing a claim. */
+    private void establishDomain(Player player, GodId god, int seconds) {
+        switch (domainFor(god)) {
+            case WEATHER -> {
+                player.setPlayerWeather(WeatherType.DOWNFALL);
+                plugin.getServer().getScheduler().runTaskLater(plugin, player::resetPlayerWeather, seconds * 20L);
+                effects(player, seconds, 1, PotionEffectType.SPEED, PotionEffectType.RESISTANCE);
+            }
+            case GROWTH -> growNearbyNature(player);
+            case WATER -> effects(player, seconds, 1, PotionEffectType.WATER_BREATHING, PotionEffectType.DOLPHINS_GRACE, PotionEffectType.REGENERATION);
+            case LIGHT -> effects(player, seconds, 1, PotionEffectType.NIGHT_VISION, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.SPEED);
+            case SHADOW -> effects(player, seconds, 1, PotionEffectType.INVISIBILITY, PotionEffectType.SLOW_FALLING, PotionEffectType.RESISTANCE);
+            case FORGE -> effects(player, seconds, 1, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.HASTE, PotionEffectType.RESISTANCE);
+            default -> effects(player, seconds, 1, PotionEffectType.RESISTANCE, PotionEffectType.REGENERATION);
+        }
+    }
+
+    /** Bone-meals existing crops and saplings only where the player can interact, then grows decorative grass safely. */
+    private void growNearbyNature(Player player) {
+        int changed = 0;
+        int baseX = player.getLocation().getBlockX();
+        int baseY = player.getLocation().getBlockY();
+        int baseZ = player.getLocation().getBlockZ();
+        Material shortGrass = Material.matchMaterial("SHORT_GRASS");
+        for (int x = baseX - 5; x <= baseX + 5; x++) {
+            for (int z = baseZ - 5; z <= baseZ + 5; z++) {
+                if (!player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
+                    continue;
+                }
+                for (int y = baseY - 3; y <= baseY + 3; y++) {
+                    Block block = player.getWorld().getBlockAt(x, y, z);
+                    if (!protections.canInteract(player, block)) {
+                        continue;
+                    }
+                    if (block.getBlockData() instanceof Ageable ageable && ageable.getAge() < ageable.getMaximumAge()) {
+                        block.applyBoneMeal(BlockFace.UP);
+                        changed++;
+                    } else if (block.getType().name().endsWith("_SAPLING")) {
+                        block.applyBoneMeal(BlockFace.UP);
+                        changed++;
+                    } else if (shortGrass != null && block.getType() == Material.GRASS_BLOCK
+                            && block.getRelative(BlockFace.UP).getType().isAir() && changed < 32) {
+                        block.getRelative(BlockFace.UP).setType(shortGrass);
+                        changed++;
+                    }
+                }
+            }
+        }
+        player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 0.5, 0), 80, 4.5, 1.1, 4.5, 0.1);
+        player.sendActionBar(Component.text("Dominio verdante: " + changed + " plantas respondieron a tu llamada."));
+    }
+
+    /** Enlarges the player through the native scale attribute and always restores the original value. */
+    private void becomeAvatar(Player player, GodId god, int seconds) {
+        AvatarState previous = avatars.remove(player.getUniqueId());
+        if (previous != null) {
+            previous.task().cancel();
+            restoreScale(player, previous.scale());
+        }
+        Attribute scaleAttribute = scaleAttribute();
+        AttributeInstance scale = scaleAttribute == null ? null : player.getAttribute(scaleAttribute);
+        if (scale == null) {
+            player.sendActionBar(Component.text("Tu cliente no admite escala divina; recibes la forma de batalla sin cambio visual."));
+            effects(player, seconds, 2, PotionEffectType.RESISTANCE, PotionEffectType.STRENGTH, PotionEffectType.ABSORPTION);
+            return;
+        }
+        double originalScale = scale.getBaseValue();
+        scale.setBaseValue(Math.min(1.85D, Math.max(1.35D, originalScale * 1.65D)));
+        effects(player, seconds, 2, PotionEffectType.RESISTANCE, PotionEffectType.STRENGTH, PotionEffectType.ABSORPTION);
+        BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            AvatarState state = avatars.remove(player.getUniqueId());
+            if (state != null && player.isOnline()) {
+                restoreScale(player, state.scale());
+            }
+        }, seconds * 20L);
+        avatars.put(player.getUniqueId(), new AvatarState(originalScale, task));
+    }
+
+    /** Restores scale defensively because custom clients or future Paper APIs may omit the attribute. */
+    private void restoreScale(Player player, double scale) {
+        Attribute scaleAttribute = scaleAttribute();
+        AttributeInstance attribute = scaleAttribute == null ? null : player.getAttribute(scaleAttribute);
+        if (attribute != null) {
+            attribute.setBaseValue(scale);
+        }
+    }
+
+    /** Resolves SCALE defensively for servers which deliberately run an older compatibility API. */
+    private Attribute scaleAttribute() {
+        try {
+            return Attribute.valueOf("SCALE");
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
+    private void effects(Player player, int seconds, int amplifier, PotionEffectType... types) {
+        for (PotionEffectType type : types) {
+            player.addPotionEffect(new PotionEffect(type, Math.max(1, seconds) * 20, amplifier, true, true, true));
+        }
+    }
+
+    private PotionEffectType primaryEffect(GodId god) {
+        return switch (domainFor(god)) {
+            case WATER -> PotionEffectType.WATER_BREATHING;
+            case GROWTH -> PotionEffectType.REGENERATION;
+            case LIGHT -> PotionEffectType.NIGHT_VISION;
+            case SHADOW -> PotionEffectType.INVISIBILITY;
+            case FORGE -> PotionEffectType.HASTE;
+            default -> PotionEffectType.RESISTANCE;
+        };
+    }
+
+    private Domain domainFor(GodId god) {
+        return switch (god) {
+            case ZEUS, ARES, NIKE, NEMESIS -> Domain.WEATHER;
+            case POSEIDON, OCEANUS, TETHYS -> Domain.WATER;
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE -> Domain.GROWTH;
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE -> Domain.LIGHT;
+            case HADES, HECATE, MORPHEUS -> Domain.SHADOW;
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> Domain.FORGE;
+            default -> Domain.WARD;
+        };
     }
 
     private void trackNearestMonster(Player player) {
@@ -132,6 +336,11 @@ public final class GenericDivineAbilityService {
     private float pitchFor(GodId god) {
         return god.isTitan() ? 0.76F : 1.18F;
     }
+
+    private enum Domain { WEATHER, WATER, GROWTH, LIGHT, SHADOW, FORGE, WARD }
+
+    private record FlightState(boolean wasAllowed, boolean wasFlying, org.bukkit.GameMode gameMode, BukkitTask task) { }
+    private record AvatarState(double scale, BukkitTask task) { }
 
     public record UseResult(boolean started, String message) {
         public static UseResult started(String message) {
