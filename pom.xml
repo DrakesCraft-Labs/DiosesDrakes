@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cl.drakescraft</groupId>
     <artifactId>dioses-drakes</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <name>DiosesDrakes</name>
     <description>Divine progression and economy sinks for DrakesCraft.</description>
     <properties>

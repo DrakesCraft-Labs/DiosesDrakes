@@ -22,4 +22,15 @@ class SkillCatalogTest {
                 .filter(skill -> skill.cooldownSeconds() <= 0)
                 .count());
     }
+
+    @Test
+    void hephaestusBranchHasCostsAndOrderedPrerequisites() {
+        var forge = SkillCatalog.find("hephaestus.forja_viva").orElseThrow();
+        var pulse = SkillCatalog.find("hephaestus.pulso_de_red").orElseThrow();
+        var sight = SkillCatalog.find("hephaestus.ojo_de_mena").orElseThrow();
+
+        assertTrue(forge.unlockCost() > 0);
+        assertEquals(java.util.List.of(forge.id()), pulse.prerequisites());
+        assertEquals(java.util.List.of(pulse.id()), sight.prerequisites());
+    }
 }

@@ -57,4 +57,27 @@ class DivineRepositoryTest {
             repository.updateTransactionState(transactionId, TransactionState.COMMITTED, "hephaestus:test");
         }
     }
+
+    @Test
+    void upkeepAndCommittedPaymentCanBeRecoveredIdempotently() throws Exception {
+        UUID playerId = UUID.randomUUID();
+        UUID transactionId = UUID.randomUUID();
+        Instant now = Instant.parse("2026-07-20T12:00:00Z");
+        String detail = "upkeep:hephaestus:" + now.toEpochMilli();
+
+        try (DivineRepository repository = new DivineRepository(tempDirectory.resolve("upkeep.db"))) {
+            repository.findOrCreate(playerId);
+            repository.selectGod(playerId, GodId.HEPHAESTUS, now, now.plusSeconds(60));
+            repository.createPreparedTransaction(transactionId, playerId, TransactionType.WEEKLY_UPKEEP, 1500.0, detail);
+            repository.updateTransactionState(transactionId, TransactionState.COMMITTED, detail);
+
+            assertEquals(transactionId, repository.findCommittedTransaction(playerId, TransactionType.WEEKLY_UPKEEP, detail).orElseThrow());
+            Instant nextDue = now.plusSeconds(604800);
+            repository.renewUpkeep(playerId, nextDue);
+            assertEquals(nextDue, repository.find(playerId).orElseThrow().upkeepDueAt());
+
+            repository.setUpkeepSuspended(playerId, true);
+            assertTrue(repository.find(playerId).orElseThrow().upkeepSuspended());
+        }
+    }
 }

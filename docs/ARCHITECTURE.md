@@ -31,7 +31,17 @@ No entrega objetos desbalanceados ni reemplaza Vault.
 
 ## Lanzamiento por etapas
 
-1. Nucleo: perfiles SQLite, transacciones atomicas, auditoria, GUI y adaptadores.
-2. Hefesto: industria, mineria, metalurgia y energia con listas Slimefun permitidas.
+1. Nucleo: perfiles SQLite, transacciones atomicas, auditoria, GUI y adaptadores. Implementado.
+2. Hefesto: industria, mineria, metalurgia y energia con listas Slimefun permitidas. Implementado como piloto.
 3. PvPDivino: region segura, progresion por combate y arena sobre controles reales.
 4. Expansion: un dios por iteracion, con documentacion y balance antes de continuar.
+
+## Hefesto en produccion
+
+- Los desbloqueos verifican dios activo, prerrequisitos y coste antes de retirar dinero por Vault.
+- Un cobro comprometido se identifica por detalle y se reutiliza tras una interrupcion, sin cobrar dos veces.
+- Cada vencimiento semanal tiene su propio identificador. La gracia es configurable; al agotarse, solo se
+  suspende la carga, no se borra el arbol.
+- Pulso de Red usa reflexion aislada contra la API de Slimefun para que el plugin siga cargando si Slimefun falta.
+  Solo acepta IDs presentes en la lista permitida y comprueba WorldGuard antes de tocar energia.
+- Ojo de Mena solo emite cambios visuales temporales al cliente en bloques donde el jugador puede interactuar.

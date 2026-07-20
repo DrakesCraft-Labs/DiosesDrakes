@@ -152,6 +152,55 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    /** Finds a completed payment so a retry can safely complete its pending game-side action. */
+    public Optional<UUID> findCommittedTransaction(UUID playerId, TransactionType type, String detail) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    SELECT transaction_id FROM divine_transactions
+                    WHERE player_uuid = ? AND transaction_type = ? AND state = ? AND detail = ?
+                    ORDER BY created_at DESC LIMIT 1
+                    """)) {
+                statement.setString(1, playerId.toString());
+                statement.setString(2, type.name());
+                statement.setString(3, TransactionState.COMMITTED.name());
+                statement.setString(4, detail);
+                try (ResultSet result = statement.executeQuery()) {
+                    return result.next() ? Optional.of(UUID.fromString(result.getString("transaction_id"))) : Optional.empty();
+                }
+            }
+        }
+    }
+
+    public void renewUpkeep(UUID playerId, Instant nextDueAt) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    UPDATE divine_profiles SET upkeep_due_at = ?, upkeep_suspended = 0
+                    WHERE player_uuid = ? AND active_god IS NOT NULL
+                    """)) {
+                statement.setLong(1, nextDueAt.toEpochMilli());
+                statement.setString(2, playerId.toString());
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException("Profile has no active god to renew");
+                }
+            }
+        }
+    }
+
+    public void setUpkeepSuspended(UUID playerId, boolean suspended) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    UPDATE divine_profiles SET upkeep_suspended = ?
+                    WHERE player_uuid = ? AND active_god IS NOT NULL
+                    """)) {
+                statement.setBoolean(1, suspended);
+                statement.setString(2, playerId.toString());
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException("Profile has no active god to suspend");
+                }
+            }
+        }
+    }
+
     public Set<String> loadout(UUID playerId) throws SQLException {
         synchronized (lock) {
             Set<String> skills = new HashSet<>();

@@ -3,7 +3,9 @@ package cl.drakescraft.diosesdrakes.service;
 import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
 import cl.drakescraft.diosesdrakes.model.DivineProfile;
 import cl.drakescraft.diosesdrakes.model.SkillDefinition;
+import cl.drakescraft.diosesdrakes.model.TransactionType;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
+import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -56,6 +58,54 @@ public final class SkillService {
         return repository.hasUnlockedSkill(playerId, definition(skillId).id());
     }
 
+    /** Purchases a skill only after validating the active god and the complete branch path. */
+    public PurchaseResult purchase(Player player, String skillId, DivineTransactionService transactions) {
+        SkillDefinition skill;
+        try {
+            skill = definition(skillId);
+            DivineProfile profile = profiles.profile(player.getUniqueId());
+            if (profile.activeGod() != skill.god()) {
+                return PurchaseResult.denied("La habilidad no pertenece a tu dios activo.");
+            }
+            if (repository.hasUnlockedSkill(player.getUniqueId(), skill.id())) {
+                return PurchaseResult.denied("Ya tienes esta habilidad desbloqueada.");
+            }
+            for (String prerequisite : skill.prerequisites()) {
+                if (!repository.hasUnlockedSkill(player.getUniqueId(), prerequisite)) {
+                    return PurchaseResult.denied("Primero debes desbloquear " + prerequisite + ".");
+                }
+            }
+        } catch (SQLException | IllegalArgumentException exception) {
+            return PurchaseResult.denied("No se pudo validar el desbloqueo.");
+        }
+
+        if (skill.unlockCost() <= 0) {
+            try {
+                repository.unlockSkill(player.getUniqueId(), skill.god(), skill.id(), Instant.now());
+                return PurchaseResult.unlocked("Habilidad desbloqueada.");
+            } catch (SQLException exception) {
+                return PurchaseResult.denied("No se pudo guardar el desbloqueo.");
+            }
+        }
+        if (transactions == null) {
+            return PurchaseResult.denied("La economia divina no esta disponible.");
+        }
+
+        String detail = "unlock:" + skill.id();
+        DivineTransactionService.TransactionResult charge = transactions.charge(
+                player, TransactionType.SKILL_UNLOCK, skill.unlockCost(), detail);
+        if (!charge.charged()) {
+            return PurchaseResult.denied(charge.message());
+        }
+        try {
+            repository.unlockSkill(player.getUniqueId(), skill.god(), skill.id(), Instant.now());
+            return PurchaseResult.unlocked("Has desbloqueado " + skill.name() + ".");
+        } catch (SQLException exception) {
+            transactions.refund(player, charge, TransactionType.SKILL_UNLOCK, skill.unlockCost(), detail);
+            return PurchaseResult.denied("No se pudo guardar la habilidad; el cobro fue revertido.");
+        }
+    }
+
     public boolean isEquippedAndUsable(UUID playerId, String skillId) {
         try {
             SkillDefinition skill = definition(skillId);
@@ -100,6 +150,16 @@ public final class SkillService {
 
         static ActivationResult denied(String message) {
             return new ActivationResult(false, 0, message);
+        }
+    }
+
+    public record PurchaseResult(boolean unlocked, String message) {
+        static PurchaseResult unlocked(String message) {
+            return new PurchaseResult(true, message);
+        }
+
+        static PurchaseResult denied(String message) {
+            return new PurchaseResult(false, message);
         }
     }
 }

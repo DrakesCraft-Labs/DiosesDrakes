@@ -6,6 +6,8 @@ import cl.drakescraft.diosesdrakes.model.DivineProfile;
 import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
+import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
+import cl.drakescraft.diosesdrakes.service.HephaestusAbilityService;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,10 +21,15 @@ import java.time.Instant;
 public final class DiosesCommand implements CommandExecutor, TabCompleter {
     private final ProfileService profiles;
     private final SkillService skills;
+    private final DivineTransactionService transactions;
+    private final HephaestusAbilityService hephaestus;
 
-    public DiosesCommand(ProfileService profiles, SkillService skills) {
+    public DiosesCommand(ProfileService profiles, SkillService skills, DivineTransactionService transactions,
+                         HephaestusAbilityService hephaestus) {
         this.profiles = profiles;
         this.skills = skills;
+        this.transactions = transactions;
+        this.hephaestus = hephaestus;
     }
 
     @Override
@@ -53,6 +60,14 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             unequip(player, args[1]);
             return true;
         }
+        if (args.length == 2 && args[0].equalsIgnoreCase("desbloquear")) {
+            unlock(player, args[1]);
+            return true;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("usar")) {
+            use(player, args[1]);
+            return true;
+        }
         if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("otorgar")) {
             grant(player, args[2], args[3]);
             return true;
@@ -65,9 +80,11 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("info", "equipar", "desequipar", "renunciar");
+            return List.of("info", "desbloquear", "equipar", "desequipar", "usar", "renunciar");
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("desbloquear")
+                || args[0].equalsIgnoreCase("equipar") || args[0].equalsIgnoreCase("desequipar")
+                || args[0].equalsIgnoreCase("usar"))) {
             return SkillCatalog.all().stream().map(SkillDefinition::id).sorted().toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("renunciar")) {
@@ -113,6 +130,16 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
         } catch (Exception exception) {
             player.sendMessage("No se pudo desequipar la habilidad.");
         }
+    }
+
+    private void unlock(Player player, String skillId) {
+        SkillService.PurchaseResult result = skills.purchase(player, skillId, transactions);
+        player.sendMessage("[Dioses] " + result.message());
+    }
+
+    private void use(Player player, String skillId) {
+        HephaestusAbilityService.UseResult result = hephaestus.use(player, skillId.toLowerCase(java.util.Locale.ROOT));
+        player.sendMessage("[Dioses] " + result.message());
     }
 
     private void grant(Player sender, String targetName, String skillId) {

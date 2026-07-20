@@ -1,10 +1,13 @@
-# Economy values stay disabled until the live balance census is reviewed.
+# Valores iniciales de Hefesto. Ajustalos tras observar una semana de economia real.
 language: es_CL
 economy:
-  enabled: false
+  enabled: true
   weekly-upkeep:
     enabled: true
     grace-hours: 24
+    check-minutes: 5
+    costs:
+      hephaestus: 1500.0
   treasury:
     enabled: true
     treasury-share-percent: 20
@@ -25,3 +28,17 @@ integrations:
   slimefun:
     enabled: true
     configured-items-only: true
+    pulso-de-red:
+      radius: 6
+      max-machines: 3
+      energy-per-machine-per-pulse: 12
+      interval-seconds: 5
+      allowed-item-ids:
+        - ELECTRIC_INGOT_FACTORY
+        - ELECTRIC_ORE_GRINDER
+        - ELECTRIC_DUST_WASHER
+        - ELECTRIC_GOLD_PAN
+hephaestus:
+  ojo-de-mena:
+    radius: 8
+    max-markers: 24

@@ -2,7 +2,7 @@ name: DiosesDrakes
 version: '${project.version}'
 main: cl.drakescraft.diosesdrakes.DiosesDrakes
 api-version: '1.21'
-folia-supported: true
+folia-supported: false
 author: JackStar
 description: Progresion divina, economia y sistemas mitologicos para DrakesCraft.
 softdepend:

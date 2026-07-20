@@ -42,11 +42,11 @@ public final class PantheonMenu {
                     "Usa /dioses renunciar confirmar para continuar."
             )));
         }
-        inventory.setItem(13, item(Material.BOOK, "Guia del Panteon", List.of(
+        inventory.setItem(4, item(Material.BOOK, "Guia del Panteon", List.of(
                 "La guia y el arbol completo llegaran con el nucleo.",
                 "Las habilidades nunca ignoraran protecciones."
         )));
-        inventory.setItem(15, item(Material.BARRIER, "Dioses futuros", List.of(
+        inventory.setItem(6, item(Material.BARRIER, "Dioses futuros", List.of(
                 "El panteon se incorporara dios por dios.",
                 "Tu progreso sera persistente y auditable."
         )));
@@ -69,7 +69,9 @@ public final class PantheonMenu {
                         state,
                         skill.description(),
                         skill.informationLine(),
-                        unlocked ? "Clic para equipar o desequipar." : "Requiere desbloqueo divino."
+                        skill.unlockInformation(),
+                        skill.prerequisites().isEmpty() ? "Sin prerrequisitos." : "Requiere: " + String.join(", ", skill.prerequisites()),
+                        unlocked ? "Clic para equipar o desequipar." : "Clic para entregar la ofrenda."
                 )));
             } catch (Exception exception) {
                 inventory.setItem(slots[index++], item(Material.BARRIER, skill.name(), List.of("No se pudo cargar esta habilidad.")));

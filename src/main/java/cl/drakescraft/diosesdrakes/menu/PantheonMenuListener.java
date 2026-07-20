@@ -5,6 +5,7 @@ import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
 import cl.drakescraft.diosesdrakes.model.SkillDefinition;
+import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,10 +16,12 @@ import java.time.Instant;
 public final class PantheonMenuListener implements Listener {
     private final ProfileService profiles;
     private final SkillService skills;
+    private final DivineTransactionService transactions;
 
-    public PantheonMenuListener(ProfileService profiles, SkillService skills) {
+    public PantheonMenuListener(ProfileService profiles, SkillService skills, DivineTransactionService transactions) {
         this.profiles = profiles;
         this.skills = skills;
+        this.transactions = transactions;
     }
 
     @EventHandler
@@ -54,7 +57,9 @@ public final class PantheonMenuListener implements Listener {
         }
         try {
             if (!skills.isUnlocked(player.getUniqueId(), skill.id())) {
-                player.sendMessage("Aun no has desbloqueado " + skill.name() + ".");
+                SkillService.PurchaseResult result = skills.purchase(player, skill.id(), transactions);
+                player.sendMessage("[Dioses] " + result.message());
+                PantheonMenu.open(player, profiles, skills);
                 return;
             }
             if (skills.equipped(player.getUniqueId()).contains(skill.id())) {

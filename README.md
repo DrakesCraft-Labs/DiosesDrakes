@@ -6,7 +6,8 @@ Progresion divina y drenajes economicos para **DrakesCraft**. Cada jugador invie
 en un dios, desbloquea poderes utiles y mantiene sus bendiciones activas mediante
 dinero, ofrendas y juego real.
 
-> Estado: nucleo persistente en construccion. **Hefesto** sera el primer dios jugable.
+> Estado: **Hefesto** es el primer dios jugable. Los demas dioses siguen en
+> diseno y no conceden efectos hasta que cada rama tenga pruebas y balance.
 
 ## Que resuelve
 
@@ -27,8 +28,10 @@ dinero, ofrendas y juego real.
 | Tesoro del Olimpo | Fraccion limitada para eventos, bosses y recompensas. |
 | Drenaje | Fraccion retirada de circulacion para controlar inflacion. |
 
-Los precios no se fijan hasta completar el censo de balances, ingresos y deudas.
-Ningun jugador nuevo debe pagar el coste de una economia ya inflada.
+Hefesto parte con valores piloto configurables: 1.200 para Forja Viva, 2.800 para
+Pulso de Red y 4.500 para Ojo de Mena; su mantenimiento semanal inicial es 1.500.
+El staff debe ajustar esos valores luego de la primera semana observando ingresos,
+balances y el archivo de auditoria.
 
 ## Panteon
 
@@ -64,9 +67,24 @@ Los poderes no pueden romper, usar, abrir ni atravesar territorios ajenos. Las
 integraciones Slimefun se habilitan por listas explicitas: una habilidad no obtiene
 acceso a una maquina, receta o red por existir; debe estar autorizada en configuracion.
 
-Poderes como el escaneo de minerales y la levitacion tendran coste, cooldown,
-restricciones de combate y auditoria. No habra xray permanente, vuelo permanente ni
-bypass de protecciones.
+`Pulso de Red` añade energia limitada a maquinas Slimefun expresamente permitidas
+en `config.yml`, dentro del alcance y autorizacion del jugador. `Ojo de Mena` marca
+en el cliente una cantidad limitada de minerales durante ocho segundos, solo en
+chunks cargados y donde WorldGuard permite interactuar. Ninguno modifica bloques,
+inventarios ni protecciones.
+
+## Hefesto: uso actual
+
+1. Selecciona a Hefesto en `/dioses`.
+2. Compra el primer nodo desde el menu o con `/dioses desbloquear hephaestus.forja_viva`.
+3. Equipa una bendicion con el menu o `/dioses equipar <id>`.
+4. Activa los poderes con `/dioses usar hephaestus.pulso_de_red` o
+   `/dioses usar hephaestus.ojo_de_mena`.
+
+Las compras pasan por Vault, quedan en `plugins/DiosesDrakes/audit/` y se recuperan
+por identificador si una operacion debe reintentarse. El mantenimiento se revisa al
+conectar y cada cinco minutos; tras las 24 horas de gracia, las bendiciones se
+suspenden sin borrar progreso hasta el siguiente pago exitoso.
 
 ## Desarrollo
 
@@ -79,8 +97,9 @@ mvn clean package
 El JAR se genera en `target/`. Las integraciones externas son opcionales en el
 arranque y se activaran solo cuando sus adaptadores esten listos.
 
-La economia permanece desactivada por defecto hasta que el staff apruebe el censo
-de balances y los costos iniciales de Hefesto.
+La economia viene activada para Hefesto. Si se requiere una puesta en marcha sin
+cobros, define `economy.enabled: false`; el plugin conserva perfiles pero niega
+habilidades con ofrenda y no ejecuta mantenimiento.
 
 Consulta [la arquitectura](docs/ARCHITECTURE.md) para responsabilidades, reglas de
 seguridad y plan de lanzamiento.

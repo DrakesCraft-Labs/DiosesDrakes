@@ -6,6 +6,7 @@ import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
 /** Coordinates Vault and SQLite with explicit recovery states instead of silent charges. */
@@ -20,9 +21,17 @@ public final class DivineTransactionService {
         this.auditLogger = auditLogger;
     }
 
-    public TransactionResult charge(Player player, TransactionType type, double amount, String detail) {
+    public synchronized TransactionResult charge(Player player, TransactionType type, double amount, String detail) {
         if (amount <= 0) {
             return TransactionResult.notCharged("El monto debe ser mayor a cero.");
+        }
+        try {
+            Optional<UUID> committed = repository.findCommittedTransaction(player.getUniqueId(), type, detail);
+            if (committed.isPresent()) {
+                return TransactionResult.reused(committed.get());
+            }
+        } catch (SQLException exception) {
+            return TransactionResult.notCharged("No se pudo verificar la transaccion previa.");
         }
         if (economy.balance(player) < amount) {
             return TransactionResult.notCharged("No tienes dinero suficiente.");
@@ -54,6 +63,17 @@ public final class DivineTransactionService {
         }
     }
 
+    /** Compensates a payment when the game-side grant cannot be persisted. */
+    public void refund(Player player, TransactionResult result, TransactionType type, double amount, String detail) {
+        if (!result.charged() || result.reused() || result.transactionId() == null) {
+            return;
+        }
+        boolean refunded = economy.deposit(player, amount);
+        updateState(result.transactionId(), player, type, amount,
+                refunded ? TransactionState.ROLLED_BACK : TransactionState.MANUAL_REVIEW,
+                detail + (refunded ? ":refunded" : ":refund-required"));
+    }
+
     private void updateState(UUID transactionId, Player player, TransactionType type,
                              double amount, TransactionState state, String detail) {
         try {
@@ -68,13 +88,17 @@ public final class DivineTransactionService {
         }
     }
 
-    public record TransactionResult(boolean charged, UUID transactionId, String message) {
+    public record TransactionResult(boolean charged, boolean reused, UUID transactionId, String message) {
         public static TransactionResult charged(UUID transactionId) {
-            return new TransactionResult(true, transactionId, "Cobro confirmado.");
+            return new TransactionResult(true, false, transactionId, "Cobro confirmado.");
+        }
+
+        public static TransactionResult reused(UUID transactionId) {
+            return new TransactionResult(true, true, transactionId, "Cobro anterior recuperado.");
         }
 
         public static TransactionResult notCharged(String message) {
-            return new TransactionResult(false, null, message);
+            return new TransactionResult(false, false, null, message);
         }
     }
 }

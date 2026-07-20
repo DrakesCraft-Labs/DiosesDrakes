@@ -37,9 +37,9 @@ public final class SkillCatalog {
 
     private static List<SkillDefinition> build() {
         List<SkillDefinition> skills = new ArrayList<>();
-        add(skills, GodId.HEPHAESTUS, "forja_viva", SkillType.PASSIVE, "Mejora la experiencia de fundicion autorizada.", 0, 0, 1);
-        add(skills, GodId.HEPHAESTUS, "pulso_de_red", SkillType.STANCE, "Potencia redes Slimefun permitidas cerca del jugador.", 45, 30, 2);
-        add(skills, GodId.HEPHAESTUS, "ojo_de_mena", SkillType.ACTIVE, "Revela mineral natural de forma temporal y auditada.", 300, 8, 3);
+        add(skills, GodId.HEPHAESTUS, "forja_viva", SkillType.PASSIVE, "Mejora la experiencia de fundicion autorizada.", 0, 0, 1, 1200, List.of());
+        add(skills, GodId.HEPHAESTUS, "pulso_de_red", SkillType.STANCE, "Entrega energia limitada a maquinas Slimefun permitidas dentro de tu proteccion.", 45, 30, 2, 2800, List.of("hephaestus.forja_viva"));
+        add(skills, GodId.HEPHAESTUS, "ojo_de_mena", SkillType.ACTIVE, "Marca minerales naturales por unos segundos sin alterar el mundo ni revelar protecciones ajenas.", 300, 8, 3, 4500, List.of("hephaestus.pulso_de_red"));
         add(skills, GodId.ZEUS, "chispa_regia", SkillType.PASSIVE, "Mitiga dano de tormenta y rayos.", 0, 0, 1);
         add(skills, GodId.ZEUS, "paso_del_rayo", SkillType.ACTIVE, "Impulso corto fuera de combate.", 90, 2, 2);
         add(skills, GodId.ZEUS, "barometro", SkillType.STANCE, "Informa cambios meteorologicos cercanos.", 60, 20, 3);
@@ -111,8 +111,14 @@ public final class SkillCatalog {
 
     private static void add(List<SkillDefinition> skills, GodId god, String suffix, SkillType type,
                             String description, int cooldown, int duration, int tier) {
+        add(skills, god, suffix, type, description, cooldown, duration, tier, 0, List.of());
+    }
+
+    private static void add(List<SkillDefinition> skills, GodId god, String suffix, SkillType type,
+                            String description, int cooldown, int duration, int tier, double unlockCost,
+                            List<String> prerequisites) {
         skills.add(new SkillDefinition(god.name().toLowerCase(Locale.ROOT) + "." + suffix,
-                god, title(suffix), type, description, cooldown, duration, tier));
+                god, title(suffix), type, description, cooldown, duration, tier, unlockCost, prerequisites));
     }
 
     private static String title(String id) {
