@@ -142,9 +142,27 @@ public final class SkillCatalog {
         add(skills, GodId.TETHYS, "fuente_nutricia", SkillType.PASSIVE, "Mejora respiracion y recuperacion al estar en agua.", 0, 0, 1);
         add(skills, GodId.TETHYS, "manantial", SkillType.ACTIVE, "Restaura hambre limitada y limpia efectos de calor propios.", 180, 1, 2);
         add(skills, GodId.TETHYS, "cauce", SkillType.STANCE, "Postura acuatica de movilidad y resistencia ambiental.", 240, 30, 3);
+        addFoundationalBranchesForArrivingPantheons(skills);
         expandEveryBranch(skills);
         extendCombatMastery(skills);
         return List.copyOf(skills);
+    }
+
+    /** Gives every arriving deity a concrete first active, passive and stance before shared ascension begins. */
+    private static void addFoundationalBranchesForArrivingPantheons(List<SkillDefinition> skills) {
+        for (GodId god : GodId.values()) {
+            boolean alreadyDefined = skills.stream().anyMatch(skill -> skill.god() == god && skill.tier() == 1);
+            if (alreadyDefined) {
+                continue;
+            }
+            PathTheme theme = themeFor(god);
+            add(skills, god, "marca_" + theme.passive(), SkillType.PASSIVE,
+                    "Marca " + theme.label() + ": pasiva inicial que mejora tu afinidad sin afectar jugadores ajenos.", 0, 0, 1);
+            add(skills, god, "rito_" + theme.strike(), SkillType.ACTIVE,
+                    "Rito " + theme.label() + ": descarga visual y controlada contra criaturas, con respeto total a claims.", 90, 4, 2);
+            add(skills, god, "voto_" + theme.domain(), SkillType.STANCE,
+                    "Voto " + theme.label() + ": postura breve para exploracion, bosses y anclas de la Convergencia.", 150, 20, 3);
+        }
     }
 
     /** Adds the seven ascension nodes shared structurally by all patrons, with themed identities. */
@@ -197,10 +215,10 @@ public final class SkillCatalog {
 
     private static Mobility mobilityFor(GodId god) {
         return switch (god) {
-            case HERMES, ARTEMIS, SELENE, CRIUS -> Mobility.FLIGHT;
+            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN -> Mobility.FLIGHT;
             case POSEIDON, OCEANUS, TETHYS -> Mobility.WATER;
-            case HADES, HECATE, MORPHEUS -> Mobility.SHADOW;
-            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> Mobility.FORGE;
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET -> Mobility.SHADOW;
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, THOR, BRIGID -> Mobility.FORGE;
             default -> Mobility.DASH;
         };
     }
@@ -208,15 +226,15 @@ public final class SkillCatalog {
     /** Maps mythology to the effect family used by the runtime executor. */
     private static PathTheme themeFor(GodId god) {
         return switch (god) {
-            case ZEUS, ARES, NIKE, NEMESIS -> new PathTheme("del trueno", "corona_tonante", "lanza_del_cielo", "paso_del_rayo", "tempestad_personal", "veredicto_del_olimpo", "avatar_tonante", "trono_electrico");
+            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR -> new PathTheme("del trueno", "corona_tonante", "lanza_del_cielo", "paso_del_rayo", "tempestad_personal", "veredicto_del_olimpo", "avatar_tonante", "trono_electrico");
             case POSEIDON, OCEANUS, TETHYS -> new PathTheme("de la marea", "pulmon_abismal", "tridente_de_ola", "salto_de_marea", "reino_de_lluvia", "veredicto_abismal", "avatar_del_mar", "corona_de_coral");
-            case DEMETER, PERSEPHONE, DIONYSUS, RHEA -> new PathTheme("del florecimiento", "raiz_perenne", "espina_viviente", "salto_de_brote", "jardin_sagrado", "veredicto_de_raiz", "avatar_verdante", "corona_de_la_cosecha");
-            case HERMES, ARTEMIS, SELENE, CRIUS -> new PathTheme("del viento", "sendero_alado", "flecha_de_viento", "vuelo_del_mensajero", "cielo_personal", "veredicto_del_cazador", "avatar_alado", "corona_del_viajero");
-            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE -> new PathTheme("de la luz", "vista_inmortal", "rayo_solar", "ascenso_del_amanecer", "halo_personal", "veredicto_solar", "avatar_radiante", "corona_del_mediodia");
-            case HADES, HECATE, MORPHEUS -> new PathTheme("de la sombra", "velo_perenne", "lanza_estigia", "ascenso_espectral", "niebla_personal", "veredicto_estigio", "avatar_del_inframundo", "corona_de_ceniza");
-            case ATHENA, HERA, COEUS, THEMIS, MNEMOSYNE -> new PathTheme("del juicio", "mente_inmortal", "decreto_divino", "paso_tactico", "santuario_personal", "veredicto_de_la_ley", "avatar_de_marfil", "corona_del_consejo");
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, BRIGID, CERNUNNOS, DAGDA -> new PathTheme("del florecimiento", "raiz_perenne", "espina_viviente", "salto_de_brote", "jardin_sagrado", "veredicto_de_raiz", "avatar_verdante", "corona_de_la_cosecha");
+            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, LUGH -> new PathTheme("del viento", "sendero_alado", "flecha_de_viento", "vuelo_del_mensajero", "cielo_personal", "veredicto_del_cazador", "avatar_alado", "corona_del_viajero");
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA -> new PathTheme("de la luz", "vista_inmortal", "rayo_solar", "ascenso_del_amanecer", "halo_personal", "veredicto_solar", "avatar_radiante", "corona_del_mediodia");
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN -> new PathTheme("de la sombra", "velo_perenne", "lanza_estigia", "ascenso_espectral", "niebla_personal", "veredicto_estigio", "avatar_del_inframundo", "corona_de_ceniza");
+            case ATHENA, HERA, COEUS, THEMIS, MNEMOSYNE, ODIN, ISIS, BASTET -> new PathTheme("del juicio", "mente_inmortal", "decreto_divino", "paso_tactico", "santuario_personal", "veredicto_de_la_ley", "avatar_de_marfil", "corona_del_consejo");
             case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> new PathTheme("de la forja", "corazon_de_brasa", "martillo_celeste", "salto_de_ascua", "forja_personal", "veredicto_de_acero", "avatar_de_bronce", "corona_del_yunque");
-            case APHRODITE, EROS, TYCHE -> new PathTheme("del encanto", "aura_favorable", "onda_de_gracia", "paso_afortunado", "jardin_de_gracia", "veredicto_del_destino", "avatar_de_rosa", "corona_de_la_fortuna");
+            case APHRODITE, EROS, TYCHE, FREYJA -> new PathTheme("del encanto", "aura_favorable", "onda_de_gracia", "paso_afortunado", "jardin_de_gracia", "veredicto_del_destino", "avatar_de_rosa", "corona_de_la_fortuna");
         };
     }
 

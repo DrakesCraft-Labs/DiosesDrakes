@@ -20,6 +20,7 @@ import cl.drakescraft.diosesdrakes.service.PvpSafetyGate;
 import cl.drakescraft.diosesdrakes.service.UpkeepService;
 import cl.drakescraft.diosesdrakes.service.VaultEconomyGateway;
 import cl.drakescraft.diosesdrakes.service.BossFavorService;
+import cl.drakescraft.diosesdrakes.service.ConvergenceService;
 import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import cl.drakescraft.diosesdrakes.integration.ProtectionGate;
 import cl.drakescraft.diosesdrakes.integration.SlimefunEnergyBridge;
@@ -36,6 +37,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Locale;
+import cl.drakescraft.diosesdrakes.model.PantheonId;
 
 public final class DiosesDrakes extends JavaPlugin {
     private DivineRepository repository;
@@ -48,6 +50,7 @@ public final class DiosesDrakes extends JavaPlugin {
     private PassiveBlessingService passives;
     private PvpSafetyGate pvpSafety;
     private BossFavorService bossFavor;
+    private ConvergenceService convergence;
 
     @Override
     public void onEnable() {
@@ -57,7 +60,7 @@ public final class DiosesDrakes extends JavaPlugin {
             return;
         }
 
-        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities, new DivineCodexService(profiles));
+        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities, new DivineCodexService(profiles), convergence);
         PluginCommand dioses = getCommand("dioses");
         if (dioses == null) {
             getLogger().severe("No se pudo registrar el comando /dioses.");
@@ -113,6 +116,11 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofDays(7)
             );
             skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            convergence = new ConvergenceService(repository, profiles,
+                    getConfig().getBoolean("convergence.enabled", true),
+                    getConfig().getInt("convergence.anchors.max", 3),
+                    getConfig().getInt("convergence.anchors.minimum-offering", 25),
+                    getConfig().getInt("convergence.anchors.dominance-margin", 250));
             bossFavor = new BossFavorService(repository,
                     getConfig().getBoolean("integrations.odysseia.boss-rewards.enabled", true),
                     getConfig().getInt("integrations.odysseia.boss-rewards.base-favor", 60),
@@ -123,7 +131,15 @@ public final class DiosesDrakes extends JavaPlugin {
                             : getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.multipliers").getKeys(false).stream()
                             .collect(java.util.stream.Collectors.toUnmodifiableMap(
                                     key -> key.toLowerCase(Locale.ROOT),
-                                    key -> getConfig().getDouble("integrations.odysseia.boss-rewards.multipliers." + key, 1.0D))));
+                                    key -> getConfig().getDouble("integrations.odysseia.boss-rewards.multipliers." + key, 1.0D))),
+                    getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.affinities") == null
+                            ? Map.of()
+                            : getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.affinities").getKeys(false).stream()
+                            .map(key -> Map.entry(key.toLowerCase(Locale.ROOT), PantheonId.fromStorage(
+                                    getConfig().getString("integrations.odysseia.boss-rewards.affinities." + key)).orElse(null)))
+                            .filter(entry -> entry.getValue() != null)
+                            .collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue)),
+                    getConfig().getDouble("integrations.odysseia.boss-rewards.matching-pantheon-bonus", 1.35D));
         } catch (SQLException | java.io.IOException exception) {
             getLogger().severe("No se pudo iniciar la persistencia divina: " + exception.getMessage());
             return false;

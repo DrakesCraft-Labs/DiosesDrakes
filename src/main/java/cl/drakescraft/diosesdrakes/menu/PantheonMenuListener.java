@@ -1,6 +1,7 @@
 package cl.drakescraft.diosesdrakes.menu;
 
 import cl.drakescraft.diosesdrakes.model.GodId;
+import cl.drakescraft.diosesdrakes.model.PantheonId;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
@@ -32,25 +33,30 @@ public final class PantheonMenuListener implements Listener {
         if (!(event.getWhoClicked() instanceof org.bukkit.entity.Player player) || event.getRawSlot() < 0) {
             return;
         }
-        if (holder.view() == PantheonMenuHolder.View.SELECTION) {
-            chooseGod(player, event.getRawSlot());
+        String action = holder.actionAt(event.getRawSlot());
+        if (holder.view() == PantheonMenuHolder.View.PANTHEONS) {
+            if (action != null) {
+                PantheonId.fromStorage(action).ifPresent(pantheon -> PantheonMenu.openDeities(player, pantheon));
+            }
             return;
         }
-        String skillId = holder.skillAt(event.getRawSlot());
-        if (skillId != null) {
-            toggleSkill(player, skillId);
+        if (holder.view() == PantheonMenuHolder.View.DEITIES) {
+            if (event.getRawSlot() == 49) {
+                PantheonMenu.open(player, profiles, skills);
+            } else if (action != null) {
+                GodId.fromStorage(action).ifPresent(god -> chooseGod(player, god));
+            }
+            return;
+        }
+        if (action != null) {
+            toggleSkill(player, action);
         }
     }
 
-    private void chooseGod(org.bukkit.entity.Player player, int slot) {
-        GodId[] gods = GodId.values();
-        if (slot < 0 || slot >= gods.length) {
-            return;
-        }
+    private void chooseGod(org.bukkit.entity.Player player, GodId god) {
         try {
-            GodId god = gods[slot];
             profiles.selectGod(player.getUniqueId(), god, Instant.now());
-            player.sendMessage(god.displayName() + " ha aceptado tu ofrenda. Tu senda ha comenzado.");
+            player.sendMessage(god.displayName() + " ha aceptado tu ofrenda en " + god.pantheon().displayName() + ". Tu senda ha comenzado.");
             PantheonMenu.open(player, profiles, skills);
         } catch (IllegalStateException exception) {
             player.sendMessage(exception.getMessage());

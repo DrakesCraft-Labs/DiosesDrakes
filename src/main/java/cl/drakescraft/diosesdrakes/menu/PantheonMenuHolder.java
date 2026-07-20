@@ -7,19 +7,19 @@ import java.util.Map;
 
 public final class PantheonMenuHolder implements InventoryHolder {
     private final View view;
-    private final Map<Integer, String> skillBySlot;
+    private final Map<Integer, String> actionBySlot;
 
-    public PantheonMenuHolder(View view, Map<Integer, String> skillBySlot) {
+    public PantheonMenuHolder(View view, Map<Integer, String> actionBySlot) {
         this.view = view;
-        this.skillBySlot = skillBySlot;
+        this.actionBySlot = actionBySlot;
     }
 
     public View view() {
         return view;
     }
 
-    public String skillAt(int slot) {
-        return skillBySlot.get(slot);
+    public String actionAt(int slot) {
+        return actionBySlot.get(slot);
     }
 
     @Override
@@ -28,7 +28,8 @@ public final class PantheonMenuHolder implements InventoryHolder {
     }
 
     public enum View {
-        SELECTION,
+        PANTHEONS,
+        DEITIES,
         SKILLS
     }
 }

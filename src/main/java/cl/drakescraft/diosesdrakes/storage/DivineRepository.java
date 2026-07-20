@@ -2,6 +2,8 @@ package cl.drakescraft.diosesdrakes.storage;
 
 import cl.drakescraft.diosesdrakes.model.DivineProfile;
 import cl.drakescraft.diosesdrakes.model.GodId;
+import cl.drakescraft.diosesdrakes.model.ConvergenceAnchor;
+import cl.drakescraft.diosesdrakes.model.PantheonId;
 import cl.drakescraft.diosesdrakes.model.TransactionState;
 import cl.drakescraft.diosesdrakes.model.TransactionType;
 
@@ -14,6 +16,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.UUID;
@@ -349,6 +355,129 @@ public final class DivineRepository implements AutoCloseable {
         }
     }
 
+    /** Creates a world marker record only; callers decide whether to place any decorative structure. */
+    public ConvergenceAnchor createAnchor(String id, String worldName, int x, int y, int z,
+                                          PantheonId dominantPantheon, Instant now) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    INSERT INTO convergence_anchors (anchor_id, world_name, block_x, block_y, block_z, dominant_pantheon, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """)) {
+                statement.setString(1, id);
+                statement.setString(2, worldName);
+                statement.setInt(3, x);
+                statement.setInt(4, y);
+                statement.setInt(5, z);
+                statement.setString(6, dominantPantheon == null ? null : dominantPantheon.name());
+                statement.setLong(7, now.toEpochMilli());
+                statement.setLong(8, now.toEpochMilli());
+                statement.executeUpdate();
+            }
+            return findAnchor(id).orElseThrow(() -> new SQLException("Anchor insert did not persist"));
+        }
+    }
+
+    public Optional<ConvergenceAnchor> findAnchor(String id) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    SELECT anchor_id, world_name, block_x, block_y, block_z, dominant_pantheon, created_at, updated_at
+                    FROM convergence_anchors WHERE anchor_id = ?
+                    """)) {
+                statement.setString(1, id);
+                try (ResultSet result = statement.executeQuery()) {
+                    return result.next() ? Optional.of(readAnchor(result)) : Optional.empty();
+                }
+            }
+        }
+    }
+
+    public List<ConvergenceAnchor> listAnchors() throws SQLException {
+        synchronized (lock) {
+            List<ConvergenceAnchor> anchors = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    SELECT anchor_id, world_name, block_x, block_y, block_z, dominant_pantheon, created_at, updated_at
+                    FROM convergence_anchors ORDER BY anchor_id
+                    """); ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    anchors.add(readAnchor(result));
+                }
+            }
+            return List.copyOf(anchors);
+        }
+    }
+
+    /** Debits only the caller's current deity favor and records a permanent public contribution in one transaction. */
+    public ConvergenceAnchor offerAnchorFavor(String anchorId, UUID playerId, GodId god, int amount, Instant now) throws SQLException {
+        synchronized (lock) {
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            try (PreparedStatement debit = connection.prepareStatement("""
+                    UPDATE divine_favor SET favor = favor - ?, updated_at = ?
+                    WHERE player_uuid = ? AND god_id = ? AND favor >= ?
+                    """); PreparedStatement contribution = connection.prepareStatement("""
+                    INSERT INTO convergence_anchor_favor (anchor_id, pantheon_id, favor, updated_at) VALUES (?, ?, ?, ?)
+                    ON CONFLICT(anchor_id, pantheon_id) DO UPDATE SET favor = convergence_anchor_favor.favor + excluded.favor,
+                    updated_at = excluded.updated_at
+                    """)) {
+                debit.setInt(1, amount);
+                debit.setLong(2, now.toEpochMilli());
+                debit.setString(3, playerId.toString());
+                debit.setString(4, god.name());
+                debit.setInt(5, amount);
+                if (debit.executeUpdate() != 1) {
+                    throw new IllegalStateException("No tienes suficiente favor con tu patron para esa ofrenda.");
+                }
+                contribution.setString(1, anchorId);
+                contribution.setString(2, god.pantheon().name());
+                contribution.setInt(3, amount);
+                contribution.setLong(4, now.toEpochMilli());
+                contribution.executeUpdate();
+                connection.commit();
+            } catch (SQLException | RuntimeException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(previousAutoCommit);
+            }
+            return findAnchor(anchorId).orElseThrow(() -> new SQLException("Anchor disappeared after offering"));
+        }
+    }
+
+    public ConvergenceAnchor updateAnchorDominance(String anchorId, PantheonId pantheon, Instant now) throws SQLException {
+        synchronized (lock) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE convergence_anchors SET dominant_pantheon = ?, updated_at = ? WHERE anchor_id = ?")) {
+                statement.setString(1, pantheon.name());
+                statement.setLong(2, now.toEpochMilli());
+                statement.setString(3, anchorId);
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException("Anchor does not exist");
+                }
+            }
+            return findAnchor(anchorId).orElseThrow(() -> new SQLException("Anchor update did not persist"));
+        }
+    }
+
+    private ConvergenceAnchor readAnchor(ResultSet result) throws SQLException {
+        String id = result.getString("anchor_id");
+        EnumMap<PantheonId, Integer> offerings = new EnumMap<>(PantheonId.class);
+        try (PreparedStatement favor = connection.prepareStatement(
+                "SELECT pantheon_id, favor FROM convergence_anchor_favor WHERE anchor_id = ?")) {
+            favor.setString(1, id);
+            try (ResultSet rows = favor.executeQuery()) {
+                while (rows.next()) {
+                    int favorValue = rows.getInt("favor");
+                    PantheonId.fromStorage(rows.getString("pantheon_id"))
+                            .ifPresent(pantheon -> offerings.put(pantheon, favorValue));
+                }
+            }
+        }
+        return new ConvergenceAnchor(id, result.getString("world_name"), result.getInt("block_x"),
+                result.getInt("block_y"), result.getInt("block_z"),
+                PantheonId.fromStorage(result.getString("dominant_pantheon")).orElse(null),
+                instant(result, "created_at"), instant(result, "updated_at"), Map.copyOf(offerings));
+    }
+
     private void initialize() throws SQLException {
         synchronized (lock) {
             try (Statement statement = connection.createStatement()) {
@@ -362,6 +491,28 @@ public final class DivineRepository implements AutoCloseable {
                             renounce_available_at INTEGER,
                             upkeep_due_at INTEGER,
                             upkeep_suspended INTEGER NOT NULL DEFAULT 0
+                        )
+                        """);
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS convergence_anchors (
+                            anchor_id TEXT PRIMARY KEY,
+                            world_name TEXT NOT NULL,
+                            block_x INTEGER NOT NULL,
+                            block_y INTEGER NOT NULL,
+                            block_z INTEGER NOT NULL,
+                            dominant_pantheon TEXT,
+                            created_at INTEGER NOT NULL,
+                            updated_at INTEGER NOT NULL
+                        )
+                        """);
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS convergence_anchor_favor (
+                            anchor_id TEXT NOT NULL,
+                            pantheon_id TEXT NOT NULL,
+                            favor INTEGER NOT NULL DEFAULT 0,
+                            updated_at INTEGER NOT NULL,
+                            PRIMARY KEY (anchor_id, pantheon_id),
+                            FOREIGN KEY (anchor_id) REFERENCES convergence_anchors(anchor_id) ON DELETE CASCADE
                         )
                         """);
                 statement.execute("""

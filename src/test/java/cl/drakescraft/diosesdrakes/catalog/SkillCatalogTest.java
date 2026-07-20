@@ -16,6 +16,15 @@ class SkillCatalogTest {
     }
 
     @Test
+    void everyPermanentPantheonHasDistinctPatronsAndCompleteBranches() {
+        for (var pantheon : cl.drakescraft.diosesdrakes.model.PantheonId.values()) {
+            var patrons = java.util.Arrays.stream(GodId.values()).filter(god -> god.pantheon() == pantheon).toList();
+            assertTrue(patrons.size() >= 5, pantheon + " needs enough patron choice to be meaningful");
+            assertTrue(patrons.stream().allMatch(god -> SkillCatalog.forGod(god).size() == 15));
+        }
+    }
+
+    @Test
     void activeSkillsAlwaysDeclareCooldowns() {
         assertEquals(0, SkillCatalog.all().stream()
                 .filter(skill -> skill.type() == SkillType.ACTIVE)

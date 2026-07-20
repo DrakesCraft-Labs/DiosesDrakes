@@ -36,13 +36,13 @@ public final class PassiveBlessingService {
         GodId god = skill.god();
         PotionEffectType type = switch (god) {
             case POSEIDON, OCEANUS, TETHYS -> PotionEffectType.WATER_BREATHING;
-            case ZEUS, HERA, ATHENA, ARES, IAPETUS, RHEA, THEMIS -> PotionEffectType.RESISTANCE;
-            case DEMETER, DIONYSUS, PERSEPHONE, MNEMOSYNE -> PotionEffectType.REGENERATION;
-            case APOLLO, HELIOS, HYPERION, THEIA, COEUS, PHOEBE, SELENE -> PotionEffectType.NIGHT_VISION;
-            case ARTEMIS, HERMES, CRIUS, CRONUS -> PotionEffectType.SPEED;
-            case HESTIA, HADES -> PotionEffectType.FIRE_RESISTANCE;
-            case HECATE, MORPHEUS -> PotionEffectType.INVISIBILITY;
-            case APHRODITE, EROS, NIKE, NEMESIS, TYCHE -> PotionEffectType.LUCK;
+            case ZEUS, HERA, ATHENA, ARES, IAPETUS, RHEA, THEMIS, THOR, TYR, ODIN, ISIS -> PotionEffectType.RESISTANCE;
+            case DEMETER, DIONYSUS, PERSEPHONE, MNEMOSYNE, BRIGID, CERNUNNOS, DAGDA -> PotionEffectType.REGENERATION;
+            case APOLLO, HELIOS, HYPERION, THEIA, COEUS, PHOEBE, SELENE, RA, HORUS, HEIMDALL -> PotionEffectType.NIGHT_VISION;
+            case ARTEMIS, HERMES, CRIUS, CRONUS, BASTET, MORRIGAN, LUGH -> PotionEffectType.SPEED;
+            case HESTIA, HADES, ANUBIS, SET -> PotionEffectType.FIRE_RESISTANCE;
+            case HECATE, MORPHEUS, LOKI -> PotionEffectType.INVISIBILITY;
+            case APHRODITE, EROS, NIKE, NEMESIS, TYCHE, FREYJA -> PotionEffectType.LUCK;
             default -> PotionEffectType.REGENERATION;
         };
         int amplifier = skill.tier() >= 10 ? 2 : skill.tier() >= 4 ? 1 : 0;

@@ -158,15 +158,15 @@ public final class GenericDivineAbilityService implements Listener {
         }
         switch (skill.god()) {
             case POSEIDON, OCEANUS, TETHYS -> effects(player, seconds, 0, PotionEffectType.WATER_BREATHING, PotionEffectType.DOLPHINS_GRACE);
-            case ZEUS, HERMES, CRIUS, CRONUS, SELENE -> effects(player, seconds, 0, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
-            case APOLLO, HELIOS, HYPERION, THEIA -> effects(player, seconds, 0, PotionEffectType.NIGHT_VISION, PotionEffectType.FIRE_RESISTANCE);
-            case HESTIA, HADES, PERSEPHONE -> effects(player, seconds, 0, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.RESISTANCE);
-            case DEMETER, RHEA, DIONYSUS -> effects(player, seconds, 0, PotionEffectType.REGENERATION, PotionEffectType.SATURATION);
-            case HERA, ATHENA, ARES, IAPETUS, THEMIS, PHOEBE -> effects(player, seconds, 0, PotionEffectType.RESISTANCE, PotionEffectType.ABSORPTION);
-            case ARTEMIS -> trackNearestMonster(player);
-            case APHRODITE -> calmNearbyMonsters(player);
-            case HECATE, MORPHEUS -> effects(player, seconds, 0, PotionEffectType.INVISIBILITY, PotionEffectType.NIGHT_VISION);
-            case EROS, NIKE, NEMESIS, TYCHE -> effects(player, seconds, 0, PotionEffectType.LUCK, PotionEffectType.REGENERATION);
+            case ZEUS, HERMES, CRIUS, CRONUS, SELENE, THOR, TYR, HEIMDALL, HORUS -> effects(player, seconds, 0, PotionEffectType.SPEED, PotionEffectType.SLOW_FALLING);
+            case APOLLO, HELIOS, HYPERION, THEIA, RA -> effects(player, seconds, 0, PotionEffectType.NIGHT_VISION, PotionEffectType.FIRE_RESISTANCE);
+            case HESTIA, HADES, PERSEPHONE, ANUBIS, ISIS -> effects(player, seconds, 0, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.RESISTANCE);
+            case DEMETER, RHEA, DIONYSUS, BRIGID, CERNUNNOS, DAGDA -> effects(player, seconds, 0, PotionEffectType.REGENERATION, PotionEffectType.SATURATION);
+            case HERA, ATHENA, ARES, IAPETUS, THEMIS, PHOEBE, ODIN -> effects(player, seconds, 0, PotionEffectType.RESISTANCE, PotionEffectType.ABSORPTION);
+            case ARTEMIS, MORRIGAN -> trackNearestMonster(player);
+            case APHRODITE, BASTET -> calmNearbyMonsters(player);
+            case HECATE, MORPHEUS, LOKI, SET -> effects(player, seconds, 0, PotionEffectType.INVISIBILITY, PotionEffectType.NIGHT_VISION);
+            case EROS, NIKE, NEMESIS, TYCHE, FREYJA, LUGH -> effects(player, seconds, 0, PotionEffectType.LUCK, PotionEffectType.REGENERATION);
             case COEUS -> showCoordinates(player);
             case MNEMOSYNE -> showLocationMemory(player);
             default -> effects(player, seconds, 0, PotionEffectType.REGENERATION);
@@ -312,7 +312,7 @@ public final class GenericDivineAbilityService implements Listener {
 
     /** Only wind patrons fly. Other domains receive movement matching their mythology. */
     private void grantMobility(Player player, GodId god, int seconds) {
-        if (switch (god) { case HERMES, ARTEMIS, SELENE, CRIUS -> true; default -> false; }) {
+        if (switch (god) { case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN -> true; default -> false; }) {
             grantFlight(player, god, seconds);
             return;
         }
@@ -507,11 +507,11 @@ public final class GenericDivineAbilityService implements Listener {
 
     private Domain domainFor(GodId god) {
         return switch (god) {
-            case ZEUS, ARES, NIKE, NEMESIS -> Domain.WEATHER;
+            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR -> Domain.WEATHER;
             case POSEIDON, OCEANUS, TETHYS -> Domain.WATER;
-            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE -> Domain.GROWTH;
-            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE -> Domain.LIGHT;
-            case HADES, HECATE, MORPHEUS -> Domain.SHADOW;
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE, BRIGID, CERNUNNOS, DAGDA, FREYJA -> Domain.GROWTH;
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA, HORUS -> Domain.LIGHT;
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN -> Domain.SHADOW;
             case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> Domain.FORGE;
             default -> Domain.WARD;
         };
@@ -556,10 +556,10 @@ public final class GenericDivineAbilityService implements Listener {
     private Color colorFor(GodId god) {
         return switch (god) {
             case POSEIDON, OCEANUS, TETHYS -> Color.fromRGB(54, 185, 255);
-            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA -> Color.fromRGB(255, 213, 92);
-            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE -> Color.fromRGB(164, 109, 255);
-            case DEMETER, RHEA, DIONYSUS, PERSEPHONE -> Color.fromRGB(112, 221, 112);
-            case ARES, NEMESIS, NIKE -> Color.fromRGB(241, 94, 94);
+            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA, THOR, RA, HORUS -> Color.fromRGB(255, 213, 92);
+            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE, LOKI, ANUBIS, SET, MORRIGAN -> Color.fromRGB(164, 109, 255);
+            case DEMETER, RHEA, DIONYSUS, PERSEPHONE, BRIGID, CERNUNNOS, DAGDA -> Color.fromRGB(112, 221, 112);
+            case ARES, NEMESIS, NIKE, TYR -> Color.fromRGB(241, 94, 94);
             default -> Color.fromRGB(233, 228, 255);
         };
     }

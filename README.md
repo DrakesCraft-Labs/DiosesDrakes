@@ -36,7 +36,28 @@ de millones tienen una progresion real donde invertir. El mantenimiento semanal 
 5.000 mas el 2,5% de lo ya invertido en la rama, con tope de 2.500.000; se cobra
 solo si el jugador decide conservar sus bendiciones activas y deja auditoria.
 
-## Panteon
+## La Convergencia permanente
+
+La Convergencia no es una temporada, no reinicia el mundo y no expira. Es la capa
+persistente de conflicto divino sobre DrakesCraft: el jugador elige primero un
+**panteon** y luego una deidad. Renunciar elimina el favor, nodos, carga y reliquias
+ligadas a esa senda; el siguiente juramento espera 48 horas y empieza desde cero.
+
+Las tres **Anclas Divinas** se instalan manualmente por el staff en plazas publicas
+ya construidas. No colocan, rompen ni reclaman bloques. Los jugadores convierten
+favor ganado al derrotar bosses en ofrendas para su panteon; el favor se descuenta y
+se suma al ancla en una unica transaccion SQLite. El dominio cambia solo cuando la
+diferencia configurada lo justifica, de modo que el resultado sobrevive reinicios y
+no oscila por una sola ofrenda. Los poderes entre jugadores siguen limitados a la
+region `pvpdivino`.
+
+Comandos operativos: `/dioses ancla lista`, `/dioses ancla estado <id>` y
+`/dioses ancla ofrendar <id> <favor>`. El staff crea cada punto con
+`/dioses ancla crear <id> <panteon>` desde su ubicacion; el plugin no genera nada
+en un mundo de 30 millones de bloques por su cuenta. Consulta
+[la guia de Convergencia](docs/CONVERGENCIA.md) antes de crear las tres anclas.
+
+## Panteones
 
 El proyecto contempla olimpicos y dioses secundarios: Zeus, Hera, Poseidon,
 Demeter, Atenea, Apolo, Artemisa, Ares, Afrodita, Hefesto, Hermes, Hestia, Hades,
@@ -45,6 +66,11 @@ Persefone, Hecate, Dionisio, Eros, Nike, Nemesis, Morfeo, Helios, Selene y Tique
 Tambien incorpora a los doce Titanes del canon de Urano y Gea: Oceano, Ceo, Crio,
 Hiperion, Japeto, Cronos, Tea, Rea, Temis, Mnemosine, Febe y Tetis. Consulta
 [el canon jugable](docs/PANTEON.md) para sus ramas, limites y fuentes.
+
+**Asgard:** Thor, Odin, Loki, Heimdall, Freyja y Tyr. **Duat:** Ra, Anubis, Isis,
+Set, Bastet y Horus. **Tuatha de Danann:** Morrigan, Lugh, Brigid, Cernunnos y
+Dagda. Japon, Mesopotamia, Mesoamerica e India quedan reservados para expansiones
+con identidad y sistemas propios: no se mezclaran como nombres sueltos en el menu.
 
 Cada patron dispone de quince nodos encadenados: cuatro **pasivas equipables**, siete
 **activas** y cuatro **posturas temporales**. La carga final se limita a dos pasivas,
@@ -109,9 +135,9 @@ displays quedan desactivados por defecto hasta validarlos en movil. Hefesto adem
 que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
 su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
 
-## Árbol divino
+## Arbol divino
 
-Los 23 dioses y 12 titanes suman **525 habilidades**. Los hitos de ascensión son
+Los 52 patronos de los cuatro panteones suman **780 habilidades**. Los hitos de ascension son
 mecánicas reales: descargas sin daño de bloque, movilidad que solo permite vuelo a
 patronos de viento, dominios personales de clima, crecimiento de cultivos y saplings
 dentro de claims autorizados, veredictos PvE de 100 de daño y avatares colosales

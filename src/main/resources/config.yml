@@ -25,6 +25,19 @@ pvp:
     enabled: false
     region-id: pvpdivino
     progression-source: arena-only
+convergence:
+  # Permanente: no hay temporadas, reseteos de mundo ni propiedad de terreno.
+  enabled: true
+  anchors:
+    # Se crean manualmente con /dioses ancla crear en plazas publicas ya construidas.
+    max: 3
+    minimum-offering: 25
+    # Evita cambios de dominio por una diferencia minuscula de favor acumulado.
+    dominance-margin: 250
+  conflict:
+    # Los poderes de dano entre jugadores siguen limitados al Region ID pvpdivino.
+    arena-only: true
+    region-id: pvpdivino
 integrations:
   odysseia:
     boss-rewards:
@@ -38,6 +51,17 @@ integrations:
         zeus: 1.6
         kratos: 1.8
         tifon: 2.0
+      # Un patron gana favor extra cuando derrota un boss de su propio panteon.
+      # Los IDs son los IDs internos de Odysseia, no nombres visibles ni comandos.
+      matching-pantheon-bonus: 1.35
+      affinities:
+        thor: NORDIC
+        odin: NORDIC
+        loki: NORDIC
+        heimdall: NORDIC
+        zeus: GREEK
+        kratos: GREEK
+        tifon: GREEK
   auraskills: passive-statistics-only
   protections:
     respect-worldguard: true
