@@ -12,6 +12,7 @@ import cl.drakescraft.diosesdrakes.service.LoadoutService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.CooldownService;
 import cl.drakescraft.diosesdrakes.service.DivineAbilityAuditLogger;
+import cl.drakescraft.diosesdrakes.service.DivineCodexService;
 import cl.drakescraft.diosesdrakes.service.HephaestusAbilityService;
 import cl.drakescraft.diosesdrakes.service.GenericDivineAbilityService;
 import cl.drakescraft.diosesdrakes.service.PassiveBlessingService;
@@ -52,7 +53,7 @@ public final class DiosesDrakes extends JavaPlugin {
             return;
         }
 
-        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities);
+        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities, new DivineCodexService(profiles));
         PluginCommand dioses = getCommand("dioses");
         if (dioses == null) {
             getLogger().severe("No se pudo registrar el comando /dioses.");

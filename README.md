@@ -89,6 +89,30 @@ inventarios ni protecciones.
 4. Activa los poderes con `/dioses usar hephaestus.pulso_de_red` o
    `/dioses usar hephaestus.ojo_de_mena`.
 
+## Códice y feedback
+
+`/dioses libro` entrega el **Códice Divino**. El libro no conserva permisos ni
+progreso: solamente explica la senda activa del jugador y puede pedirse de nuevo
+sin riesgo. Para consultar cualquier nodo puntual existe `/dioses info <id>`.
+
+Las activaciones muestran duración y recarga en la barra de acción. Cada familia
+divina tiene partículas, color y sonido propios; Hefesto además muestra la energía
+que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
+su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
+
+## Árbol inicial
+
+Cada patron empieza con tres nodos encadenados: una **pasiva equipada**, una
+**activa con recarga** y una **postura temporal**. Los costes iniciales son 1.200,
+2.800 y 4.500 Dragmas. El catálogo tiene 23 dioses olímpicos y menores, más 12
+titanes; sus ramas iniciales suman 105 nodos documentados en
+[`docs/PANTEON.md`](docs/PANTEON.md). Las expansiones se implementan patron por
+patron con mecánicas reales, no como nodos de relleno.
+
+La referencia jugable para la comunidad se publica en
+`https://web.drakescraft.cl/dioses.html`. Al cambiar `SkillCatalog`, actualiza la
+página pública en el mismo cambio para que el juego y su documentación no diverjan.
+
 Las compras pasan por Vault, quedan en `plugins/DiosesDrakes/audit/` y se recuperan
 por identificador si una operacion debe reintentarse. El mantenimiento se revisa al
 conectar y cada cinco minutos; tras las 24 horas de gracia, las bendiciones se

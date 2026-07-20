@@ -8,6 +8,7 @@ import cl.drakescraft.diosesdrakes.service.ProfileService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.GenericDivineAbilityService;
+import cl.drakescraft.diosesdrakes.service.DivineCodexService;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,13 +24,15 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     private final SkillService skills;
     private final DivineTransactionService transactions;
     private final GenericDivineAbilityService abilities;
+    private final DivineCodexService codex;
 
     public DiosesCommand(ProfileService profiles, SkillService skills, DivineTransactionService transactions,
-                         GenericDivineAbilityService abilities) {
+                         GenericDivineAbilityService abilities, DivineCodexService codex) {
         this.profiles = profiles;
         this.skills = skills;
         this.transactions = transactions;
         this.abilities = abilities;
+        this.codex = codex;
     }
 
     @Override
@@ -46,6 +49,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("renunciar") && args[1].equalsIgnoreCase("confirmar")) {
             renounce(player);
+            return true;
+        }
+        if (args.length == 1 && args[0].equalsIgnoreCase("libro")) {
+            codex.give(player);
             return true;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
@@ -80,7 +87,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("info", "desbloquear", "equipar", "desequipar", "usar", "renunciar");
+            return List.of("info", "desbloquear", "equipar", "desequipar", "usar", "libro", "renunciar");
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("desbloquear")
                 || args[0].equalsIgnoreCase("equipar") || args[0].equalsIgnoreCase("desequipar")
@@ -107,9 +114,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
 
     private void showSkillInfo(Player player, String skillId) {
         SkillCatalog.find(skillId).ifPresentOrElse(skill -> {
-            player.sendMessage("[Dioses] " + skill.name() + " | " + skill.god().displayName());
+            player.sendMessage("[Dioses] " + skill.name() + " | " + skill.god().displayName() + " | " + skill.type());
             player.sendMessage(skill.description());
-            player.sendMessage(skill.informationLine() + " | nivel " + skill.tier());
+            player.sendMessage(skill.informationLine() + " | nivel " + skill.tier() + " | costo "
+                    + Math.round(skill.unlockCost()) + " Dragmas");
             player.sendMessage("Debe desbloquearse y equiparse en una ranura disponible.");
         }, () -> player.sendMessage("No existe una habilidad con ese identificador."));
     }

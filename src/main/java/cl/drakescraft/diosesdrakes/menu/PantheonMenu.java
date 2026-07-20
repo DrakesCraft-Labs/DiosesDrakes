@@ -48,12 +48,12 @@ public final class PantheonMenu {
             inventory.setItem(slot++, item(icon, god.displayName(), List.of(
                     god.isTitan() ? "Titan: fuerza cosmica primordial." : "Dios del panteon de DrakesCraft.",
                     "Elegirlo elimina el progreso solo al renunciar a tu patron actual.",
-                    "Clic para iniciar esta senda."
+                    "Tres nodos: pasiva, activa y postura.", "Clic para iniciar esta senda."
             )));
         }
-        inventory.setItem(49, item(Material.BOOK, "Reglas del Panteon", List.of(
+        inventory.setItem(49, item(Material.WRITTEN_BOOK, "Codice del Panteon", List.of(
                 "Un solo patron activo.", "Renunciar borra el arbol y aplica 48 horas.",
-                "Las bendiciones respetan protecciones y mantenimiento."
+                "Las bendiciones respetan protecciones y mantenimiento.", "Pide el libro con /dioses libro."
         )));
         player.openInventory(inventory);
     }
@@ -80,7 +80,8 @@ public final class PantheonMenu {
                 Material material = unlocked ? (equipped ? Material.LIME_DYE : Material.GOLD_INGOT) : Material.GRAY_DYE;
                 String state = equipped ? "Equipada" : unlocked ? "Desbloqueada" : "Bloqueada";
                 inventory.setItem(slot, item(material, skill.name(), List.of(
-                        state, skill.description(), skill.informationLine(), skill.unlockInformation(),
+                        "Estado: " + state, "Tipo: " + skill.type() + " | Nivel " + skill.tier(), skill.description(),
+                        skill.informationLine(), skill.unlockInformation(),
                         skill.prerequisites().isEmpty() ? "Sin prerrequisitos." : "Requiere: " + String.join(", ", skill.prerequisites()),
                         unlocked ? "Clic para equipar o desequipar." : "Clic para entregar la ofrenda."
                 )));

@@ -3,6 +3,8 @@ package cl.drakescraft.diosesdrakes.service;
 import cl.drakescraft.diosesdrakes.integration.ProtectionGate;
 import cl.drakescraft.diosesdrakes.integration.SlimefunEnergyBridge;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -92,6 +94,9 @@ public final class HephaestusAbilityService {
                 int granted = findChargeableMachines(current).stream().mapToInt(block -> energy.addEnergy(block, energyPerMachine)).sum();
                 if (granted > 0) {
                     current.sendActionBar(net.kyori.adventure.text.Component.text("Pulso de Red: +" + granted + " J"));
+                    current.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, current.getLocation().add(0, 1.1, 0), 18,
+                            0.9, 0.5, 0.9, 0.08);
+                    current.playSound(current.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 0.32F, 1.55F);
                 }
             }
         }, 1L, pulseIntervalSeconds * 20L);
@@ -110,6 +115,9 @@ public final class HephaestusAbilityService {
         }
 
         ores.forEach(block -> player.sendBlockChange(block.getLocation(), Material.GLOWSTONE.createBlockData()));
+        player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1.0, 0), 30,
+                0.8, 0.6, 0.8, 0.04);
+        player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 0.75F, 1.35F);
         plugin.getServer().getScheduler().runTaskLater(plugin,
                 () -> ores.forEach(block -> player.sendBlockChange(block.getLocation(), block.getBlockData())),
                 activation.durationSeconds() * 20L);

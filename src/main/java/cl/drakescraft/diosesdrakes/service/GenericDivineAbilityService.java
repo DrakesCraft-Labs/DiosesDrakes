@@ -6,6 +6,8 @@ import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.model.SkillType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
+import org.bukkit.Color;
+import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -49,7 +51,7 @@ public final class GenericDivineAbilityService {
             return UseResult.denied(activation.message());
         }
         apply(player, skill, Math.max(1, activation.durationSeconds()));
-        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.6F, 1.2F);
+        announceActivation(player, skill, activation.durationSeconds());
         return UseResult.started(skill.name() + " activo durante " + activation.durationSeconds() + " segundos.");
     }
 
@@ -68,6 +70,10 @@ public final class GenericDivineAbilityService {
             case COEUS -> showCoordinates(player);
             case MNEMOSYNE -> showLocationMemory(player);
             default -> effects(player, seconds, PotionEffectType.REGENERATION);
+        }
+
+        if (skill.id().equals("hermes.ascenso_de_icaro")) {
+            effects(player, Math.min(seconds, 4), PotionEffectType.LEVITATION, PotionEffectType.SLOW_FALLING);
         }
     }
 
@@ -100,6 +106,31 @@ public final class GenericDivineAbilityService {
         var location = player.getLocation();
         player.sendActionBar(Component.text("Recuerdo: " + location.getWorld().getName() + " "
                 + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ()));
+    }
+
+    private void announceActivation(Player player, SkillDefinition skill, int seconds) {
+        Color color = colorFor(skill.god());
+        player.getWorld().spawnParticle(Particle.DUST, player.getLocation().add(0, 1.0, 0), 28,
+                0.65, 0.75, 0.65, 0, new Particle.DustOptions(color, 1.25F));
+        player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1.0, 0), 18,
+                0.55, 0.65, 0.55, 0.08);
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.65F, pitchFor(skill.god()));
+        player.sendActionBar(Component.text(skill.name() + " | " + seconds + " s | recarga " + skill.cooldownSeconds() + " s"));
+    }
+
+    private Color colorFor(GodId god) {
+        return switch (god) {
+            case POSEIDON, OCEANUS, TETHYS -> Color.fromRGB(54, 185, 255);
+            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA -> Color.fromRGB(255, 213, 92);
+            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE -> Color.fromRGB(164, 109, 255);
+            case DEMETER, RHEA, DIONYSUS, PERSEPHONE -> Color.fromRGB(112, 221, 112);
+            case ARES, NEMESIS, NIKE -> Color.fromRGB(241, 94, 94);
+            default -> Color.fromRGB(233, 228, 255);
+        };
+    }
+
+    private float pitchFor(GodId god) {
+        return god.isTitan() ? 0.76F : 1.18F;
     }
 
     public record UseResult(boolean started, String message) {
