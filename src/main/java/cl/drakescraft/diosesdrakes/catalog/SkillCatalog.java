@@ -143,6 +143,7 @@ public final class SkillCatalog {
         add(skills, GodId.TETHYS, "manantial", SkillType.ACTIVE, "Restaura hambre limitada y limpia efectos de calor propios.", 180, 1, 2);
         add(skills, GodId.TETHYS, "cauce", SkillType.STANCE, "Postura acuatica de movilidad y resistencia ambiental.", 240, 30, 3);
         expandEveryBranch(skills);
+        extendCombatMastery(skills);
         return List.copyOf(skills);
     }
 
@@ -155,7 +156,7 @@ public final class SkillCatalog {
             add(skills, god, "ascension_" + theme.strike(), SkillType.ACTIVE,
                     "Descarga " + theme.label() + " sobre criaturas cercanas. Nunca dana jugadores fuera de PvPDivino.", 150, 1, 5);
             add(skills, god, "ascension_" + theme.flight(), SkillType.ACTIVE,
-                    "Ascenso " + theme.label() + ": vuelo breve, impulso y caida segura fuera de combate.", 240, 10, 6);
+                    mobilityDescription(theme, god), 240, 10, 6);
             add(skills, god, "ascension_" + theme.domain(), SkillType.STANCE,
                     "Dominio " + theme.label() + ": altera solo tu experiencia local y respeta claims y protecciones.", 300, 20, 7);
             add(skills, god, "ascension_" + theme.execution(), SkillType.ACTIVE,
@@ -165,6 +166,43 @@ public final class SkillCatalog {
             add(skills, god, "ascension_" + theme.capstone(), SkillType.PASSIVE,
                     "Corona " + theme.label() + ": pasiva final que potencia tu especialidad mientras este equipada.", 0, 0, 10);
         }
+    }
+
+    /** Adds a shared combat grammar while retaining a distinct elemental presentation for every patron. */
+    private static void extendCombatMastery(List<SkillDefinition> skills) {
+        for (GodId god : GodId.values()) {
+            PathTheme theme = themeFor(god);
+            add(skills, god, "combate_" + theme.strike() + "_punos", SkillType.ACTIVE,
+                    "Puños " + theme.label() + ": requiere mano vacia y remata una criatura con un impacto breve.", 70, 1, 11);
+            add(skills, god, "combate_" + theme.execution() + "_arma", SkillType.ACTIVE,
+                    "Arma " + theme.label() + ": requiere espada, hacha, maza o lanza y ejecuta una tecnica PvE de alto impacto.", 150, 1, 12);
+            add(skills, god, "combate_" + theme.flight() + "_carrera", SkillType.ACTIVE,
+                    "Carrera " + theme.label() + ": embestida corta con velocidad y caida segura, sin teletransporte.", 110, 5, 13);
+            add(skills, god, "combate_" + theme.domain() + "_guardia", SkillType.STANCE,
+                    "Guardia " + theme.label() + ": absorbe parte del siguiente castigo de una criatura y devuelve un impacto visual.", 180, 15, 14);
+            add(skills, god, "combate_" + theme.capstone() + "_maestria", SkillType.PASSIVE,
+                    "Maestria " + theme.label() + ": pasiva final para sostener tu build de combate equipada.", 0, 0, 15);
+        }
+    }
+
+    private static String mobilityDescription(PathTheme theme, GodId god) {
+        return switch (mobilityFor(god)) {
+            case FLIGHT -> "Ascenso " + theme.label() + ": vuelo breve, impulso y caida segura fuera de combate.";
+            case WATER -> "Ascenso " + theme.label() + ": corriente marina, respiracion y desplazamiento acuatico breve.";
+            case SHADOW -> "Ascenso " + theme.label() + ": deslizamiento sigiloso con velocidad y caida segura.";
+            case FORGE -> "Ascenso " + theme.label() + ": carrera entre brasas con resistencia al fuego y velocidad.";
+            default -> "Ascenso " + theme.label() + ": salto de combate y velocidad breve, sin vuelo ni teletransporte.";
+        };
+    }
+
+    private static Mobility mobilityFor(GodId god) {
+        return switch (god) {
+            case HERMES, ARTEMIS, SELENE, CRIUS -> Mobility.FLIGHT;
+            case POSEIDON, OCEANUS, TETHYS -> Mobility.WATER;
+            case HADES, HECATE, MORPHEUS -> Mobility.SHADOW;
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> Mobility.FORGE;
+            default -> Mobility.DASH;
+        };
     }
 
     /** Maps mythology to the effect family used by the runtime executor. */
@@ -215,9 +253,16 @@ public final class SkillCatalog {
             case 7 -> 4_500_000;
             case 8 -> 9_000_000;
             case 9 -> 18_000_000;
-            default -> 36_000_000;
+            case 10 -> 36_000_000;
+            case 11 -> 24_000_000;
+            case 12 -> 38_000_000;
+            case 13 -> 55_000_000;
+            case 14 -> 75_000_000;
+            default -> 100_000_000;
         };
     }
+
+    private enum Mobility { FLIGHT, WATER, SHADOW, FORGE, DASH }
 
     private record PathTheme(String label, String passive, String strike, String flight, String domain,
                              String execution, String avatar, String capstone) {

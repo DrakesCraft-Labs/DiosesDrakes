@@ -57,17 +57,22 @@ masiva.
 
 ## Regla de entrega
 
-Cada rama tiene diez nodos: tres pasivas, cuatro activas y tres posturas. Los tres
-primeros fijan la identidad del patron; los siete de ascension se organizan en una
-pasiva mayor, una descarga PvE, vuelo temporal, dominio local, veredicto PvE de
-100 de daño, avatar colosal y una corona pasiva final.
+Cada rama tiene quince nodos: cuatro pasivas, siete activas y cuatro posturas. Los
+tres primeros fijan la identidad del patron; los siete de ascension se organizan en
+una pasiva mayor, una descarga PvE, movilidad contextual, dominio local, veredicto
+PvE de 100 de daño, avatar colosal y una corona pasiva final. Los cinco nodos de
+maestria agregan una tecnica de puños con mano vacia, una tecnica con espada, hacha,
+maza o lanza, carrera, guardia reactiva y maestria pasiva final.
 
 El motor bloquea la rama completa durante combate PvP survival. Las descargas usan
 rayos de efecto sin fuego ni daño de bloque y solo seleccionan criaturas hostiles;
-el veredicto tampoco puede seleccionar jugadores. El vuelo conserva y restituye el
-estado original. Los dominios de tormenta usan clima personal, y los de crecimiento
-solo fertilizan cultivos o saplings en bloques que WorldGuard autorice al jugador.
-PvPDivino será la única arena que habilite poderes de combate entre jugadores.
+el veredicto tampoco puede seleccionar jugadores. Solo los patronos de viento usan
+vuelo; los demas reciben movilidad propia de su dominio. La lanza realiza una
+estocada de mayor alcance y retroceso, la espada abre un arco contra criaturas, y
+hacha o maza aplican impacto pesado. Los dominios de tormenta usan clima personal,
+y los de crecimiento solo fertilizan cultivos o saplings en bloques que WorldGuard
+autorice al jugador. PvPDivino será la única arena que habilite poderes de combate
+entre jugadores.
 
 ## Fuentes de investigacion
 

@@ -61,12 +61,12 @@ public final class PantheonMenu {
     private static void openSkills(Player player, DivineProfile profile, SkillService skills) {
         Map<Integer, String> skillBySlot = new HashMap<>();
         PantheonMenuHolder holder = new PantheonMenuHolder(PantheonMenuHolder.View.SKILLS, skillBySlot);
-        Inventory inventory = Bukkit.createInventory(holder, 27, Component.text(profile.activeGod().displayName() + " - Senda"));
+        Inventory inventory = Bukkit.createInventory(holder, 54, Component.text(profile.activeGod().displayName() + " - Senda"));
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             inventory.setItem(slot, item(Material.BLACK_STAINED_GLASS_PANE, " ", List.of()));
         }
 
-        int[] slots = {11, 13, 15};
+        int[] slots = {10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38};
         int index = 0;
         for (SkillDefinition skill : SkillCatalog.forGod(profile.activeGod())) {
             if (index >= slots.length) {
@@ -89,7 +89,7 @@ public final class PantheonMenu {
                 inventory.setItem(slot, item(Material.BARRIER, skill.name(), List.of("No se pudo cargar esta habilidad.")));
             }
         }
-        inventory.setItem(22, item(Material.RED_DYE, "Renunciar a " + profile.activeGod().displayName(), List.of(
+        inventory.setItem(49, item(Material.RED_DYE, "Renunciar a " + profile.activeGod().displayName(), List.of(
                 "Elimina todo tu progreso actual.", "Usa /dioses renunciar confirmar."
         )));
         player.openInventory(inventory);

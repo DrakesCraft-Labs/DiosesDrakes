@@ -85,6 +85,27 @@ public final class DivineCinematicService implements Listener {
         activeScenes.put(player.getUniqueId(), new Scene(sceneId, displays, task));
     }
 
+    /** Creates a short client-side hit-stop cue around a PvE target without changing blocks or other players. */
+    public void impact(Player player, GodId god, Monster target, boolean heavy) {
+        Location center = target.getLocation().add(0, Math.max(0.7, target.getHeight() * 0.5), 0);
+        target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, center, 1, 0, 0, 0, 0);
+        target.getWorld().spawnParticle(Particle.CRIT, center, heavy ? 28 : 16, 0.45, 0.55, 0.45, 0.1);
+        target.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, center, heavy ? 18 : 9, 0.35, 0.45, 0.35, 0.04);
+        target.getWorld().spawnParticle(Particle.DUST, center, heavy ? 18 : 10, 0.45, 0.6, 0.45, 0,
+                new Particle.DustOptions(colorFor(god), heavy ? 1.45F : 1.1F));
+        target.getWorld().playSound(center, heavy ? Sound.ENTITY_PLAYER_ATTACK_STRONG : Sound.ENTITY_PLAYER_ATTACK_CRIT,
+                heavy ? 0.9F : 0.65F, heavy ? 0.72F : 1.18F);
+    }
+
+    /** Visual feedback for a successful guard, kept local to the defending player. */
+    public void guard(Player player, GodId god) {
+        Location center = player.getLocation().add(0, 1.0, 0);
+        player.getWorld().spawnParticle(Particle.ENCHANTED_HIT, center, 28, 0.55, 0.8, 0.55, 0.15);
+        player.getWorld().spawnParticle(Particle.DUST, center, 18, 0.45, 0.7, 0.45, 0,
+                new Particle.DustOptions(colorFor(god), 1.3F));
+        player.playSound(center, Sound.ITEM_SHIELD_BLOCK, 0.82F, 0.82F);
+    }
+
     /** Surrounds the player with a client-interpolated ring for a controlled duration. */
     public void domain(Player player, GodId god, int seconds) {
         clear(player.getUniqueId());

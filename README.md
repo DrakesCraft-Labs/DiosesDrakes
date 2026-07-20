@@ -6,7 +6,7 @@ Progresion divina y drenajes economicos para **DrakesCraft**. Cada jugador invie
 en un dios, desbloquea poderes utiles y mantiene sus bendiciones activas mediante
 dinero, ofrendas y juego real.
 
-> Estado: el panteon completo tiene ramas de diez nodos. Las habilidades se
+> Estado: el panteon completo tiene ramas de quince nodos. Las habilidades se
 > sujetan a carga equipada, enfriamientos, costes y protecciones.
 
 ## Que resuelve
@@ -29,7 +29,8 @@ dinero, ofrendas y juego real.
 | Drenaje | Fraccion retirada de circulacion para controlar inflacion. |
 
 La curva base empieza en 10.000 y concentra la inversion al final: el decimo nodo
-cuesta 36.000.000 y completar una rama requiere 71.010.000 monedas. Asi los
+cuesta 36.000.000, la maestria final 100.000.000 y completar una rama requiere
+362.010.000 monedas. Asi los
 jugadores nuevos pueden entrar por las primeras bendiciones, mientras los balances
 de millones tienen una progresion real donde invertir. El mantenimiento semanal es
 5.000 mas el 2,5% de lo ya invertido en la rama, con tope de 2.500.000; se cobra
@@ -45,8 +46,8 @@ Tambien incorpora a los doce Titanes del canon de Urano y Gea: Oceano, Ceo, Crio
 Hiperion, Japeto, Cronos, Tea, Rea, Temis, Mnemosine, Febe y Tetis. Consulta
 [el canon jugable](docs/PANTEON.md) para sus ramas, limites y fuentes.
 
-Cada patron dispone de diez nodos encadenados: tres **pasivas equipables**, cuatro
-**activas** y tres **posturas temporales**. La carga final se limita a dos pasivas,
+Cada patron dispone de quince nodos encadenados: cuatro **pasivas equipables**, siete
+**activas** y cuatro **posturas temporales**. La carga final se limita a dos pasivas,
 dos activas y una postura; desbloquear toda una rama no permite llevar todos los
 poderes al mismo tiempo.
 
@@ -109,12 +110,14 @@ su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
 
 ## Árbol divino
 
-Los 23 dioses y 12 titanes suman **350 habilidades**. Los hitos de ascensión son
-mecánicas reales: descargas sin daño de bloque, vuelo temporal con restitución
-segura, dominios personales de clima, crecimiento de cultivos y saplings dentro de
-claims autorizados, veredictos PvE de 100 de daño y avatares colosales temporales.
-Nada de esto puede golpear jugadores en survival normal; PvPDivino mantiene su
-propio control regional.
+Los 23 dioses y 12 titanes suman **525 habilidades**. Los hitos de ascensión son
+mecánicas reales: descargas sin daño de bloque, movilidad que solo permite vuelo a
+patronos de viento, dominios personales de clima, crecimiento de cultivos y saplings
+dentro de claims autorizados, veredictos PvE de 100 de daño y avatares colosales
+temporales. Los cinco nodos de maestria final agregan puños con mano vacia, arco de
+espada, golpe de hacha o maza, estocada de lanza, carrera y guardia reactiva contra
+criaturas. Nada de esto puede golpear jugadores en survival normal; PvPDivino
+mantiene su propio control regional.
 
 La referencia jugable para la comunidad se publica en
 `https://web.drakescraft.cl/dioses.html`. Al cambiar `SkillCatalog`, actualiza la

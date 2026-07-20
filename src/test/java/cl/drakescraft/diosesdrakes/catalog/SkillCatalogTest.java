@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SkillCatalogTest {
     @Test
-    void everyGodAndTitanHasATenNodeProgression() {
+    void everyGodAndTitanHasAFifteenNodeProgression() {
         for (GodId god : GodId.values()) {
-            assertEquals(10, SkillCatalog.forGod(god).size(), god + " needs a ten-node path");
+            assertEquals(15, SkillCatalog.forGod(god).size(), god + " needs a fifteen-node path");
         }
     }
 
@@ -27,9 +27,9 @@ class SkillCatalogTest {
     void everyBranchHasAControlledActivePassiveAndStanceLoadout() {
         for (GodId god : GodId.values()) {
             var branch = SkillCatalog.forGod(god);
-            assertEquals(3, branch.stream().filter(skill -> skill.type() == SkillType.PASSIVE).count());
-            assertEquals(4, branch.stream().filter(skill -> skill.type() == SkillType.ACTIVE).count());
-            assertEquals(3, branch.stream().filter(skill -> skill.type() == SkillType.STANCE).count());
+            assertEquals(4, branch.stream().filter(skill -> skill.type() == SkillType.PASSIVE).count());
+            assertEquals(7, branch.stream().filter(skill -> skill.type() == SkillType.ACTIVE).count());
+            assertEquals(4, branch.stream().filter(skill -> skill.type() == SkillType.STANCE).count());
             assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 8 && skill.cooldownSeconds() >= 480));
             assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 9 && skill.durationSeconds() > 0));
         }
@@ -55,7 +55,7 @@ class SkillCatalogTest {
         assertEquals(12, titans.size());
         for (GodId titan : titans) {
             var branch = SkillCatalog.forGod(titan);
-            assertEquals(10, branch.size(), titan + " needs a complete ten-node branch");
+            assertEquals(15, branch.size(), titan + " needs a complete fifteen-node branch");
             assertTrue(branch.stream().allMatch(skill -> skill.unlockCost() > 0));
             assertTrue(branch.stream().filter(skill -> skill.tier() > 1).allMatch(skill -> !skill.prerequisites().isEmpty()));
         }
@@ -64,8 +64,19 @@ class SkillCatalogTest {
     @Test
     void completeAscensionIsARealLateGameMoneySink() {
         double total = SkillCatalog.forGod(GodId.ZEUS).stream().mapToDouble(skill -> skill.unlockCost()).sum();
-        assertTrue(total >= 70_000_000.0D);
+        assertTrue(total >= 360_000_000.0D);
         assertEquals(36_000_000.0D, SkillCatalog.forGod(GodId.ZEUS).stream()
                 .filter(skill -> skill.tier() == 10).findFirst().orElseThrow().unlockCost());
+    }
+
+    @Test
+    void everyPatronHasFistWeaponDashAndGuardTechniques() {
+        for (GodId god : GodId.values()) {
+            var branch = SkillCatalog.forGod(god);
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 11 && skill.id().endsWith("_punos")));
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 12 && skill.id().endsWith("_arma")));
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 13 && skill.id().endsWith("_carrera")));
+            assertTrue(branch.stream().anyMatch(skill -> skill.tier() == 14 && skill.id().endsWith("_guardia")));
+        }
     }
 }
