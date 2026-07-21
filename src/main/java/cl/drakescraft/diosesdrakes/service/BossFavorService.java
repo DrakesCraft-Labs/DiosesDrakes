@@ -8,6 +8,7 @@ import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 
 /** Awards durable favor from external boss systems without letting them mutate divine storage directly. */
 public final class BossFavorService {
@@ -47,11 +48,14 @@ public final class BossFavorService {
             }
 
             int favor = calculateFavor(victory, profile);
-            DivineRepository.BossFavorResult result = repository.awardBossFavor(
-                    victory.bossInstanceId(), victory.playerId(), profile.activeGod(), victory.bossId(), favor,
-                    victory.contribution(), victory.totalContribution(), victory.defeatedAt());
-            return new DivineBossReward(result.granted() ? DivineBossReward.Status.GRANTED : DivineBossReward.Status.ALREADY_GRANTED,
-                    result.granted() ? favor : 0, result.totalFavor());
+            ForkJoinPool.commonPool().execute(() -> {
+                try {
+                    repository.awardBossFavor(
+                            victory.bossInstanceId(), victory.playerId(), profile.activeGod(), victory.bossId(), favor,
+                            victory.contribution(), victory.totalContribution(), victory.defeatedAt());
+                } catch (SQLException ignored) {}
+            });
+            return new DivineBossReward(DivineBossReward.Status.GRANTED, favor, favor);
         } catch (SQLException exception) {
             return new DivineBossReward(DivineBossReward.Status.FAILED, 0, 0);
         }

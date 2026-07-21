@@ -22,6 +22,8 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 import java.time.Instant;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class DiosesCommand implements CommandExecutor, TabCompleter {
     private final ProfileService profiles;
@@ -47,6 +49,16 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
         this.codex = codex;
         this.convergence = convergence;
         this.bossFavor = bossFavor;
+    }
+
+    private void runAsync(Runnable task) {
+        Plugin plugin = JavaPlugin.getProvidingPlugin(DiosesCommand.class);
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, task);
+    }
+    
+    private void runSync(Runnable task) {
+        Plugin plugin = JavaPlugin.getProvidingPlugin(DiosesCommand.class);
+        plugin.getServer().getScheduler().runTask(plugin, task);
     }
 
     @Override
@@ -149,12 +161,22 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage("Uso: /dioses ancla ofrendar <id> <favor>. Minimo " + convergence.minimumOffering() + ".");
                     } else {
                         int amount = Integer.parseInt(args[3]);
-                        ConvergenceService.OfferResult result = convergence.offer(player.getUniqueId(), args[2], amount, Instant.now());
-                        player.sendMessage("Ofrendaste " + result.spentFavor() + " de favor a " + result.anchor().id() + " para "
-                                + result.offeredPantheon().displayName() + ".");
-                        if (result.dominanceChanged()) {
-                            player.sendMessage("La ancla ahora reconoce a " + result.anchor().dominantPantheon().displayName() + ".");
-                        }
+                        runAsync(() -> {
+                            try {
+                                ConvergenceService.OfferResult result = convergence.offer(player.getUniqueId(), args[2], amount, Instant.now());
+                                runSync(() -> {
+                                    player.sendMessage("Ofrendaste " + result.spentFavor() + " de favor a " + result.anchor().id() + " para "
+                                            + result.offeredPantheon().displayName() + ".");
+                                    if (result.dominanceChanged()) {
+                                        player.sendMessage("La ancla ahora reconoce a " + result.anchor().dominantPantheon().displayName() + ".");
+                                    }
+                                });
+                            } catch (IllegalArgumentException | IllegalStateException exception) {
+                                runSync(() -> player.sendMessage(exception.getMessage()));
+                            } catch (Exception exception) {
+                                runSync(() -> player.sendMessage("No se pudo ofrendar a la Convergencia. El staff debe revisar la base divina."));
+                            }
+                        });
                     }
                 }
                 case "crear" -> createAnchor(player, args);
@@ -181,10 +203,17 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
         PantheonId pantheon = PantheonId.fromStorage(args[3])
                 .orElseThrow(() -> new IllegalArgumentException("Panteon invalido."));
         org.bukkit.Location location = player.getLocation();
-        ConvergenceAnchor anchor = convergence.createAnchor(args[2], location.getWorld().getName(),
-                location.getBlockX(), location.getBlockY(), location.getBlockZ(), pantheon, Instant.now());
-        player.sendMessage("Ancla permanente " + anchor.id() + " creada en " + anchor.worldName() + " "
-                + anchor.blockX() + ", " + anchor.blockY() + ", " + anchor.blockZ() + ". No altera ni reclama bloques.");
+        
+        runAsync(() -> {
+            try {
+                ConvergenceAnchor anchor = convergence.createAnchor(args[2], location.getWorld().getName(),
+                        location.getBlockX(), location.getBlockY(), location.getBlockZ(), pantheon, Instant.now());
+                runSync(() -> player.sendMessage("Ancla permanente " + anchor.id() + " creada en " + anchor.worldName() + " "
+                        + anchor.blockX() + ", " + anchor.blockY() + ", " + anchor.blockZ() + ". No altera ni reclama bloques."));
+            } catch (Exception exception) {
+                runSync(() -> player.sendMessage("No se pudo crear la ancla."));
+            }
+        });
     }
 
     private void listAnchors(Player player) throws Exception {
@@ -209,15 +238,17 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     }
 
     private void renounce(Player player) {
-        try {
-            DivineProfile profile = profiles.renounce(player.getUniqueId(), Instant.now());
-            player.sendMessage("Renunciaste a tu dios. El panteon estara disponible nuevamente desde "
-                    + profile.renounceAvailableAt() + ".");
-        } catch (IllegalStateException exception) {
-            player.sendMessage(exception.getMessage());
-        } catch (Exception exception) {
-            player.sendMessage("No se pudo completar la renuncia. El staff debe revisar la auditoria.");
-        }
+        runAsync(() -> {
+            try {
+                DivineProfile profile = profiles.renounce(player.getUniqueId(), Instant.now());
+                runSync(() -> player.sendMessage("Renunciaste a tu dios. El panteon estara disponible nuevamente desde "
+                        + profile.renounceAvailableAt() + "."));
+            } catch (IllegalStateException exception) {
+                runSync(() -> player.sendMessage(exception.getMessage()));
+            } catch (Exception exception) {
+                runSync(() -> player.sendMessage("No se pudo completar la renuncia. El staff debe revisar la auditoria."));
+            }
+        });
     }
 
     /** Shows only durable progression state, never recalculates or changes favor. */
@@ -251,26 +282,32 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     }
 
     private void equip(Player player, String skillId) {
-        try {
-            skills.equip(player.getUniqueId(), skillId);
-            player.sendMessage("Habilidad equipada: " + skillId + ".");
-        } catch (Exception exception) {
-            player.sendMessage(exception.getMessage());
-        }
+        runAsync(() -> {
+            try {
+                skills.equip(player.getUniqueId(), skillId);
+                runSync(() -> player.sendMessage("Habilidad equipada: " + skillId + "."));
+            } catch (Exception exception) {
+                runSync(() -> player.sendMessage(exception.getMessage()));
+            }
+        });
     }
 
     private void unequip(Player player, String skillId) {
-        try {
-            skills.unequip(player.getUniqueId(), skillId);
-            player.sendMessage("Habilidad desequipada: " + skillId + ".");
-        } catch (Exception exception) {
-            player.sendMessage("No se pudo desequipar la habilidad.");
-        }
+        runAsync(() -> {
+            try {
+                skills.unequip(player.getUniqueId(), skillId);
+                runSync(() -> player.sendMessage("Habilidad desequipada: " + skillId + "."));
+            } catch (Exception exception) {
+                runSync(() -> player.sendMessage("No se pudo desequipar la habilidad."));
+            }
+        });
     }
 
     private void unlock(Player player, String skillId) {
-        SkillService.PurchaseResult result = skills.purchase(player, skillId, transactions);
-        player.sendMessage("[Dioses] " + result.message());
+        runAsync(() -> {
+            SkillService.PurchaseResult result = skills.purchase(player, skillId, transactions);
+            runSync(() -> player.sendMessage("[Dioses] " + result.message()));
+        });
     }
 
     private void use(Player player, String skillId) {
@@ -288,12 +325,16 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("El jugador debe estar conectado para recibir una habilidad de prueba.");
             return;
         }
-        try {
-            skills.grant(target.getUniqueId(), skillId);
-            sender.sendMessage("Habilidad otorgada a " + target.getName() + ".");
-            target.sendMessage("Has desbloqueado " + skillId + ". Equipa la habilidad con /dioses equipar.");
-        } catch (Exception exception) {
-            sender.sendMessage(exception.getMessage());
-        }
+        runAsync(() -> {
+            try {
+                skills.grant(target.getUniqueId(), skillId);
+                runSync(() -> {
+                    sender.sendMessage("Habilidad otorgada a " + target.getName() + ".");
+                    target.sendMessage("Has desbloqueado " + skillId + ". Equipa la habilidad con /dioses equipar.");
+                });
+            } catch (Exception exception) {
+                runSync(() -> sender.sendMessage(exception.getMessage()));
+            }
+        });
     }
 }

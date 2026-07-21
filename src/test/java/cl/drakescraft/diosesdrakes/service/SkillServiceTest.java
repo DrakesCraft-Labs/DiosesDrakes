@@ -24,7 +24,8 @@ class SkillServiceTest {
         UUID playerId = UUID.randomUUID();
         try (DivineRepository repository = new DivineRepository(tempDirectory.resolve("dioses.db"))) {
             ProfileService profiles = new ProfileService(repository, Duration.ofHours(48), Duration.ofDays(7));
-            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            ProfileCacheManager cacheManager = new ProfileCacheManager(repository, java.util.logging.Logger.getAnonymousLogger());
+            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService(), cacheManager);
             profiles.selectGod(playerId, GodId.HEPHAESTUS, Instant.now());
 
             assertFalse(skills.isEquippedAndUsable(playerId, "hephaestus.forja_viva"));
@@ -41,7 +42,8 @@ class SkillServiceTest {
         Instant now = Instant.parse("2026-07-16T20:00:00Z");
         try (DivineRepository repository = new DivineRepository(tempDirectory.resolve("cooldown.db"))) {
             ProfileService profiles = new ProfileService(repository, Duration.ofHours(48), Duration.ofDays(7));
-            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            ProfileCacheManager cacheManager = new ProfileCacheManager(repository, java.util.logging.Logger.getAnonymousLogger());
+            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService(), cacheManager);
             profiles.selectGod(playerId, GodId.HEPHAESTUS, now);
             skills.grant(playerId, "hephaestus.pulso_de_red");
             skills.equip(playerId, "hephaestus.pulso_de_red");
@@ -70,7 +72,8 @@ class SkillServiceTest {
         UUID playerId = UUID.randomUUID();
         try (DivineRepository repository = new DivineRepository(tempDirectory.resolve("loadout.db"))) {
             ProfileService profiles = new ProfileService(repository, Duration.ofHours(48), Duration.ofDays(7));
-            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            ProfileCacheManager cacheManager = new ProfileCacheManager(repository, java.util.logging.Logger.getAnonymousLogger());
+            SkillService skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService(), cacheManager);
             profiles.selectGod(playerId, GodId.ZEUS, Instant.now());
             skills.grant(playerId, "zeus.chispa_regia");
             skills.equip(playerId, "zeus.chispa_regia");

@@ -8,6 +8,7 @@ import cl.drakescraft.diosesdrakes.listener.HephaestusListener;
 import cl.drakescraft.diosesdrakes.service.DivineAuditLogger;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
+import cl.drakescraft.diosesdrakes.service.ProfileCacheManager;
 import cl.drakescraft.diosesdrakes.service.LoadoutService;
 import cl.drakescraft.diosesdrakes.service.SkillService;
 import cl.drakescraft.diosesdrakes.service.CooldownService;
@@ -43,6 +44,7 @@ public final class DiosesDrakes extends JavaPlugin {
     private DivineRepository repository;
     private ProfileService profiles;
     private SkillService skills;
+    private ProfileCacheManager cacheManager;
     private DivineTransactionService transactions;
     private UpkeepService upkeep;
     private HephaestusAbilityService hephaestus;
@@ -71,6 +73,7 @@ public final class DiosesDrakes extends JavaPlugin {
 
         dioses.setExecutor(command);
         dioses.setTabCompleter(command);
+        getServer().getPluginManager().registerEvents(cacheManager, this);
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles, skills, transactions), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
         getServer().getPluginManager().registerEvents(pvpSafety, this);
@@ -80,6 +83,7 @@ public final class DiosesDrakes extends JavaPlugin {
         getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills, bossFavor), this, ServicePriority.Normal);
         scheduleUpkeepChecks();
         schedulePassiveRefresh();
+        getServer().getOnlinePlayers().forEach(player -> cacheManager.load(player.getUniqueId()));
         getLogger().info("DiosesDrakes " + getPluginMeta().getVersion()
                 + " habilitado; panteon, favor de bosses y Convergencia listos.");
     }
@@ -117,7 +121,8 @@ public final class DiosesDrakes extends JavaPlugin {
                     Duration.ofHours(getConfig().getLong("renunciation.cooldown-hours", 48)),
                     Duration.ofDays(7)
             );
-            skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService());
+            cacheManager = new ProfileCacheManager(repository, getLogger());
+            skills = new SkillService(repository, profiles, new LoadoutService(repository), new CooldownService(), cacheManager);
             convergence = new ConvergenceService(repository, profiles,
                     getConfig().getBoolean("convergence.enabled", true),
                     getConfig().getInt("convergence.anchors.max", 3),

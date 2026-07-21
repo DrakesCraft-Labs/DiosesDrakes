@@ -19,12 +19,14 @@ public final class SkillService {
     private final ProfileService profiles;
     private final LoadoutService loadout;
     private final CooldownService cooldowns;
+    private final ProfileCacheManager cacheManager;
 
-    public SkillService(DivineRepository repository, ProfileService profiles, LoadoutService loadout, CooldownService cooldowns) {
+    public SkillService(DivineRepository repository, ProfileService profiles, LoadoutService loadout, CooldownService cooldowns, ProfileCacheManager cacheManager) {
         this.repository = repository;
         this.profiles = profiles;
         this.loadout = loadout;
         this.cooldowns = cooldowns;
+        this.cacheManager = cacheManager;
     }
 
     public void grant(UUID playerId, String skillId) throws SQLException {
@@ -34,6 +36,7 @@ public final class SkillService {
             throw new IllegalStateException("La habilidad no pertenece al dios activo del jugador.");
         }
         repository.unlockSkill(playerId, skill.god(), skill.id(), Instant.now());
+        cacheManager.addUnlocked(playerId, skill.id());
     }
 
     public void equip(UUID playerId, String skillId) throws SQLException {
@@ -42,15 +45,17 @@ public final class SkillService {
             throw new IllegalStateException("Debes desbloquear esta habilidad antes de equiparla.");
         }
         loadout.equip(playerId, skill.id());
+        cacheManager.addEquipped(playerId, skill.id());
     }
 
     public void unequip(UUID playerId, String skillId) throws SQLException {
         loadout.unequip(playerId, skillId);
+        cacheManager.removeEquipped(playerId, skillId);
     }
 
     /** Returns the persisted loadout so the GUI can describe the player's real state. */
-    public Set<String> equipped(UUID playerId) throws SQLException {
-        return loadout.equipped(playerId);
+    public Set<String> equipped(UUID playerId) {
+        return cacheManager.getEquipped(playerId);
     }
 
     /** Reads the small equipped loadout once instead of probing every catalog node on each refresh. */
@@ -60,7 +65,7 @@ public final class SkillService {
             if (profile.upkeepSuspended() || profile.activeGod() == null) {
                 return Set.of();
             }
-            return loadout.equipped(playerId).stream()
+            return cacheManager.getEquipped(playerId).stream()
                     .flatMap(skillId -> SkillCatalog.find(skillId).stream())
                     .filter(skill -> skill.god() == profile.activeGod())
                     .collect(java.util.stream.Collectors.toUnmodifiableSet());
@@ -70,8 +75,8 @@ public final class SkillService {
     }
 
     /** Checks ownership without silently equipping or activating the blessing. */
-    public boolean isUnlocked(UUID playerId, String skillId) throws SQLException {
-        return repository.hasUnlockedSkill(playerId, definition(skillId).id());
+    public boolean isUnlocked(UUID playerId, String skillId) {
+        return cacheManager.isUnlocked(playerId, definition(skillId).id());
     }
 
     /** Purchases a skill only after validating the active god and the complete branch path. */
@@ -83,11 +88,11 @@ public final class SkillService {
             if (profile.activeGod() != skill.god()) {
                 return PurchaseResult.denied("La habilidad no pertenece a tu dios activo.");
             }
-            if (repository.hasUnlockedSkill(player.getUniqueId(), skill.id())) {
+            if (cacheManager.isUnlocked(player.getUniqueId(), skill.id())) {
                 return PurchaseResult.denied("Ya tienes esta habilidad desbloqueada.");
             }
             for (String prerequisite : skill.prerequisites()) {
-                if (!repository.hasUnlockedSkill(player.getUniqueId(), prerequisite)) {
+                if (!cacheManager.isUnlocked(player.getUniqueId(), prerequisite)) {
                     return PurchaseResult.denied("Primero debes desbloquear " + prerequisite + ".");
                 }
             }
@@ -98,6 +103,7 @@ public final class SkillService {
         if (skill.unlockCost() <= 0) {
             try {
                 repository.unlockSkill(player.getUniqueId(), skill.god(), skill.id(), Instant.now());
+                cacheManager.addUnlocked(player.getUniqueId(), skill.id());
                 return PurchaseResult.unlocked("Habilidad desbloqueada.");
             } catch (SQLException exception) {
                 return PurchaseResult.denied("No se pudo guardar el desbloqueo.");
@@ -115,6 +121,7 @@ public final class SkillService {
         }
         try {
             repository.unlockSkill(player.getUniqueId(), skill.god(), skill.id(), Instant.now());
+            cacheManager.addUnlocked(player.getUniqueId(), skill.id());
             return PurchaseResult.unlocked("Has desbloqueado " + skill.name() + ".");
         } catch (SQLException exception) {
             transactions.refund(player, charge, TransactionType.SKILL_UNLOCK, skill.unlockCost(), detail);
@@ -127,7 +134,7 @@ public final class SkillService {
             SkillDefinition skill = definition(skillId);
             DivineProfile profile = profiles.profile(playerId);
             return !profile.upkeepSuspended() && isUnlockedForActiveGod(playerId, skill)
-                    && loadout.equipped(playerId).contains(skill.id());
+                    && cacheManager.getEquipped(playerId).contains(skill.id());
         } catch (SQLException | IllegalArgumentException exception) {
             return false;
         }
@@ -151,7 +158,7 @@ public final class SkillService {
 
     private boolean isUnlockedForActiveGod(UUID playerId, SkillDefinition skill) throws SQLException {
         DivineProfile profile = profiles.profile(playerId);
-        return profile.activeGod() == skill.god() && repository.hasUnlockedSkill(playerId, skill.id());
+        return profile.activeGod() == skill.god() && cacheManager.isUnlocked(playerId, skill.id());
     }
 
     private SkillDefinition definition(String skillId) {
