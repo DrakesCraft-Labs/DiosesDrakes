@@ -60,7 +60,8 @@ public final class DiosesDrakes extends JavaPlugin {
             return;
         }
 
-        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities, new DivineCodexService(profiles), convergence);
+        DiosesCommand command = new DiosesCommand(profiles, skills, transactions, abilities,
+                new DivineCodexService(profiles), convergence, bossFavor);
         PluginCommand dioses = getCommand("dioses");
         if (dioses == null) {
             getLogger().severe("No se pudo registrar el comando /dioses.");
@@ -79,7 +80,8 @@ public final class DiosesDrakes extends JavaPlugin {
         getServer().getServicesManager().register(DivineAccess.class, new DiosesDrakesAccess(profiles, skills, bossFavor), this, ServicePriority.Normal);
         scheduleUpkeepChecks();
         schedulePassiveRefresh();
-        getLogger().info("DiosesDrakes core 0.1.0 habilitado con Hefesto.");
+        getLogger().info("DiosesDrakes " + getPluginMeta().getVersion()
+                + " habilitado; panteon, favor de bosses y Convergencia listos.");
     }
 
     @Override

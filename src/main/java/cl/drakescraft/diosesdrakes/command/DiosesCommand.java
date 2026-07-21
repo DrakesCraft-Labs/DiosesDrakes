@@ -10,6 +10,7 @@ import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.GenericDivineAbilityService;
 import cl.drakescraft.diosesdrakes.service.DivineCodexService;
 import cl.drakescraft.diosesdrakes.service.ConvergenceService;
+import cl.drakescraft.diosesdrakes.service.BossFavorService;
 import cl.drakescraft.diosesdrakes.model.ConvergenceAnchor;
 import cl.drakescraft.diosesdrakes.model.PantheonId;
 import org.bukkit.command.Command;
@@ -29,20 +30,23 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     private final GenericDivineAbilityService abilities;
     private final DivineCodexService codex;
     private final ConvergenceService convergence;
+    private final BossFavorService bossFavor;
 
     public DiosesCommand(ProfileService profiles, SkillService skills, DivineTransactionService transactions,
                          GenericDivineAbilityService abilities, DivineCodexService codex) {
-        this(profiles, skills, transactions, abilities, codex, null);
+        this(profiles, skills, transactions, abilities, codex, null, null);
     }
 
     public DiosesCommand(ProfileService profiles, SkillService skills, DivineTransactionService transactions,
-                         GenericDivineAbilityService abilities, DivineCodexService codex, ConvergenceService convergence) {
+                         GenericDivineAbilityService abilities, DivineCodexService codex, ConvergenceService convergence,
+                         BossFavorService bossFavor) {
         this.profiles = profiles;
         this.skills = skills;
         this.transactions = transactions;
         this.abilities = abilities;
         this.codex = codex;
         this.convergence = convergence;
+        this.bossFavor = bossFavor;
     }
 
     @Override
@@ -63,6 +67,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 1 && args[0].equalsIgnoreCase("libro")) {
             codex.give(player);
+            return true;
+        }
+        if (args.length == 1 && (args[0].equalsIgnoreCase("estado") || args[0].equalsIgnoreCase("favor"))) {
+            showStatus(player);
             return true;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
@@ -101,7 +109,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("info", "desbloquear", "equipar", "desequipar", "usar", "libro", "renunciar", "ancla");
+            return List.of("estado", "favor", "info", "desbloquear", "equipar", "desequipar", "usar", "libro", "renunciar", "ancla");
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("desbloquear")
                 || args[0].equalsIgnoreCase("equipar") || args[0].equalsIgnoreCase("desequipar")
@@ -209,6 +217,26 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(exception.getMessage());
         } catch (Exception exception) {
             player.sendMessage("No se pudo completar la renuncia. El staff debe revisar la auditoria.");
+        }
+    }
+
+    /** Shows only durable progression state, never recalculates or changes favor. */
+    private void showStatus(Player player) {
+        try {
+            DivineProfile profile = profiles.profile(player.getUniqueId());
+            if (profile.activeGod() == null) {
+                player.sendMessage("[Dioses] Aun no has jurado lealtad a un patron.");
+                return;
+            }
+            int favor = bossFavor == null ? 0 : bossFavor.currentFavor(player.getUniqueId());
+            String upkeep = profile.upkeepSuspended()
+                    ? "SUSPENDIDO"
+                    : profile.upkeepDueAt() == null ? "sin mantenimiento"
+                    : "vence " + profile.upkeepDueAt();
+            player.sendMessage("[Dioses] Patron: " + profile.activeGod().displayName()
+                    + " | Favor: " + favor + " | Mantenimiento: " + upkeep + ".");
+        } catch (Exception exception) {
+            player.sendMessage("[Dioses] No se pudo consultar tu estado divino.");
         }
     }
 
