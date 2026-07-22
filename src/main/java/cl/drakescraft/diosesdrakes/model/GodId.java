@@ -21,7 +21,23 @@ public enum GodId {
     SET("Set", PantheonId.EGYPTIAN), BASTET("Bastet", PantheonId.EGYPTIAN), HORUS("Horus", PantheonId.EGYPTIAN),
 
     MORRIGAN("Morrigan", PantheonId.CELTIC), LUGH("Lugh", PantheonId.CELTIC), BRIGID("Brigid", PantheonId.CELTIC),
-    CERNUNNOS("Cernunnos", PantheonId.CELTIC), DAGDA("Dagda", PantheonId.CELTIC);
+    CERNUNNOS("Cernunnos", PantheonId.CELTIC), DAGDA("Dagda", PantheonId.CELTIC),
+
+    AMATERASU("Amaterasu", PantheonId.JAPANESE), SUSANOO("Susanoo", PantheonId.JAPANESE),
+    TSUKUYOMI("Tsukuyomi", PantheonId.JAPANESE), INARI("Inari", PantheonId.JAPANESE),
+    HACHIMAN("Hachiman", PantheonId.JAPANESE),
+
+    MARDUK("Marduk", PantheonId.MESOPOTAMIAN), ISHTAR("Ishtar", PantheonId.MESOPOTAMIAN),
+    ENKI("Enki", PantheonId.MESOPOTAMIAN), ERESHKIGAL("Ereshkigal", PantheonId.MESOPOTAMIAN),
+    NERGAL("Nergal", PantheonId.MESOPOTAMIAN),
+
+    QUETZALCOATL("Quetzalcoatl", PantheonId.AZTEC), HUITZILOPOCHTLI("Huitzilopochtli", PantheonId.AZTEC),
+    TLALOC("Tlaloc", PantheonId.AZTEC), TEZCATLIPOCA("Tezcatlipoca", PantheonId.AZTEC),
+    XIPE_TOTEC("Xipe Totec", PantheonId.AZTEC),
+
+    SHIVA("Shiva", PantheonId.HINDU), VISHNU("Vishnu", PantheonId.HINDU),
+    DURGA("Durga", PantheonId.HINDU), GANESHA("Ganesha", PantheonId.HINDU),
+    HANUMAN("Hanuman", PantheonId.HINDU);
 
     private final String displayName;
     private final PantheonId pantheon;

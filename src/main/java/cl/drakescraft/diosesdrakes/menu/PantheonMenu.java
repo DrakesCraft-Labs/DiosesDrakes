@@ -19,8 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Renders either the full pantheon selection or the three-node branch of the active patron. */
+/** Renders pantheon selection and paginated fifteen-node patron branches. */
 public final class PantheonMenu {
+    private static final int[] DEITY_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43
+    };
+
     private PantheonMenu() {
     }
 
@@ -39,12 +46,12 @@ public final class PantheonMenu {
 
     private static void openPantheons(Player player) {
         Map<Integer, String> pantheonBySlot = new HashMap<>();
-        Inventory inventory = Bukkit.createInventory(new PantheonMenuHolder(PantheonMenuHolder.View.PANTHEONS, pantheonBySlot), 27,
+        Inventory inventory = Bukkit.createInventory(new PantheonMenuHolder(PantheonMenuHolder.View.PANTHEONS, pantheonBySlot), 36,
                 Component.text("§0§l🏛️ La Convergencia §8| §6Panteones"));
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             inventory.setItem(slot, item(Material.CYAN_STAINED_GLASS_PANE, " ", List.of()));
         }
-        int[] slots = {10, 12, 14, 16};
+        int[] slots = {10, 11, 12, 13, 14, 15, 16, 22};
         PantheonId[] pantheons = PantheonId.values();
         for (int index = 0; index < pantheons.length; index++) {
             PantheonId pantheon = pantheons[index];
@@ -59,7 +66,7 @@ public final class PantheonMenu {
                     "§a§l▶ Clic para explorar sus deidades."
             )));
         }
-        inventory.setItem(22, item(Material.WRITTEN_BOOK, "§e§l📜 Códice de la Convergencia", List.of(
+        inventory.setItem(31, item(Material.WRITTEN_BOOK, "§e§l📜 Códice de la Convergencia", List.of(
                 "§7Un patrón activo dentro de un panteón.",
                 "§cRenunciar borra favor, nodos y reliquias de esa senda.",
                 "§eEl cooldown de cambio es de 48 horas.",
@@ -71,33 +78,44 @@ public final class PantheonMenu {
     }
 
     public static void openDeities(Player player, PantheonId pantheon) {
+        openDeities(player, pantheon, 0);
+    }
+
+    public static void openDeities(Player player, PantheonId pantheon, int requestedPage) {
         Map<Integer, String> godBySlot = new HashMap<>();
         PantheonMenuHolder holder = new PantheonMenuHolder(PantheonMenuHolder.View.DEITIES, godBySlot);
-        Inventory inventory = Bukkit.createInventory(holder, 54, Component.text(pantheon.displayName() + " - Patrones"));
+        List<GodId> patrons = java.util.Arrays.stream(GodId.values())
+                .filter(god -> god.pantheon() == pantheon).toList();
+        int pageCount = Math.max(1, (patrons.size() + DEITY_SLOTS.length - 1) / DEITY_SLOTS.length);
+        int page = Math.clamp(requestedPage, 0, pageCount - 1);
+        Inventory inventory = Bukkit.createInventory(holder, 54, Component.text(pantheon.displayName()
+                + " - Patrones " + (page + 1) + "/" + pageCount));
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             inventory.setItem(slot, item(Material.BLACK_STAINED_GLASS_PANE, " ", List.of()));
         }
-        int slot = 10;
-        for (GodId god : GodId.values()) {
-            if (god.pantheon() != pantheon) {
-                continue;
-            }
-            if (slot == 17) {
-                slot = 19;
-            }
-            if (slot >= 44) {
-                break;
-            }
+        int first = page * DEITY_SLOTS.length;
+        int last = Math.min(first + DEITY_SLOTS.length, patrons.size());
+        for (int index = first; index < last; index++) {
+            GodId god = patrons.get(index);
+            int slot = DEITY_SLOTS[index - first];
             godBySlot.put(slot, god.name());
             Material icon = god.isTitan() ? Material.AMETHYST_SHARD : Material.NETHER_STAR;
-            inventory.setItem(slot++, item(icon, god.displayName(), List.of(
+            inventory.setItem(slot, item(icon, god.displayName(), List.of(
                     god.isTitan() ? "Titan primordial del panteon griego." : "Patron de " + pantheon.displayName() + ".",
                     "15 nodos: pasivas, activas, posturas y tecnicas de combate.",
                     "Clic para jurar tu senda."
             )));
         }
+        if (page > 0) {
+            godBySlot.put(45, "PAGE:" + pantheon.name() + ":" + (page - 1));
+            inventory.setItem(45, item(Material.ARROW, "Pagina anterior", List.of("Clic para retroceder.")));
+        }
         inventory.setItem(49, item(Material.ARROW, "Volver a panteones", List.of("Clic para regresar.")));
         inventory.setItem(47, item(Material.KNOWLEDGE_BOOK, "§e§lGuía divina", List.of("§7Patrones, favor, habilidades y anclas.", "§a§l▶ Clic para abrir.")));
+        if (page + 1 < pageCount) {
+            godBySlot.put(53, "PAGE:" + pantheon.name() + ":" + (page + 1));
+            inventory.setItem(53, item(Material.ARROW, "Pagina siguiente", List.of("Clic para continuar.")));
+        }
         player.openInventory(inventory);
     }
 
@@ -197,6 +215,10 @@ public final class PantheonMenu {
             case NORDIC -> Material.LIGHTNING_ROD;
             case EGYPTIAN -> Material.SUNFLOWER;
             case CELTIC -> Material.MOSS_BLOCK;
+            case JAPANESE -> Material.CHERRY_SAPLING;
+            case MESOPOTAMIAN -> Material.CHISELED_BOOKSHELF;
+            case AZTEC -> Material.FEATHER;
+            case HINDU -> Material.PINK_PETALS;
         };
     }
 

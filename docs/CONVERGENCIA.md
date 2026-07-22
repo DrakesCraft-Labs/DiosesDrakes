@@ -13,6 +13,10 @@ circulacion a traves de decisiones visibles y sostenidas.
 | Asgard | Runas, juramentos, tormenta, caceria y Ragnarok. | Thor, Odin, Loki, Heimdall, Freyja, Tyr. |
 | Duat | Ciclo solar, juicio, muerte, desierto y retorno. | Ra, Anubis, Isis, Set, Bastet, Horus. |
 | Tuatha de Danann | Bruma, metamorfosis, naturaleza y pactos. | Morrigan, Lugh, Brigid, Cernunnos, Dagda. |
+| Takamagahara | Sol, tormenta, luna, cosecha y disciplina. | Amaterasu, Susanoo, Tsukuyomi, Inari, Hachiman. |
+| Ekur | Realeza, deseo, aguas primordiales y muerte. | Marduk, Ishtar, Enki, Ereshkigal, Nergal. |
+| Teteocan | Viento, sol, lluvia, noche y renovacion. | Quetzalcoatl, Huitzilopochtli, Tlaloc, Tezcatlipoca, Xipe Totec. |
+| Devaloka | Transformacion, preservacion, fuerza y caminos. | Shiva, Vishnu, Durga, Ganesha, Hanuman. |
 
 Un jugador elige panteon y patron desde `/dioses`. Solo puede mantener una senda.
 Al renunciar se borran favor, nodos, carga y reliquias del patron actual; hay 48
@@ -69,5 +73,5 @@ entre jugadores en survival.
 4. Activa el JAR solo en un reinicio ya planificado; no hace falta reiniciar ni
    regenerar el mundo para crear, ajustar o consultar anclas despues.
 
-Los panteones posteriores deben incorporar patronos, habilidades, afinidades de
+Toda ampliacion posterior debe incorporar patronos, habilidades, afinidades de
 boss y una identidad jugable propia antes de habilitarse en `PantheonId`.

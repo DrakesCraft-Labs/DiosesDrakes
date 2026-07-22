@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Data-driven pantheon. Every patron has a ten-node path with real effect families. */
+/** Data-driven pantheon. Every patron has a fifteen-node path backed by reusable effect families. */
 public final class SkillCatalog {
     private static final Map<String, SkillDefinition> BY_ID = build().stream()
             .collect(Collectors.toUnmodifiableMap(SkillDefinition::id, Function.identity()));
@@ -247,10 +247,10 @@ public final class SkillCatalog {
 
     private static Mobility mobilityFor(GodId god) {
         return switch (god) {
-            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN -> Mobility.FLIGHT;
-            case POSEIDON, OCEANUS, TETHYS -> Mobility.WATER;
-            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET -> Mobility.SHADOW;
-            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, THOR, BRIGID -> Mobility.FORGE;
+            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN, QUETZALCOATL, HANUMAN -> Mobility.FLIGHT;
+            case POSEIDON, OCEANUS, TETHYS, ENKI, TLALOC -> Mobility.WATER;
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, TSUKUYOMI, ERESHKIGAL, TEZCATLIPOCA -> Mobility.SHADOW;
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, THOR, BRIGID, NERGAL -> Mobility.FORGE;
             default -> Mobility.DASH;
         };
     }
@@ -258,15 +258,15 @@ public final class SkillCatalog {
     /** Maps mythology to the effect family used by the runtime executor. */
     private static PathTheme themeFor(GodId god) {
         return switch (god) {
-            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR -> new PathTheme("del trueno", "corona_tonante", "lanza_del_cielo", "paso_del_rayo", "tempestad_personal", "veredicto_del_olimpo", "avatar_tonante", "trono_electrico");
-            case POSEIDON, OCEANUS, TETHYS -> new PathTheme("de la marea", "pulmon_abismal", "tridente_de_ola", "salto_de_marea", "reino_de_lluvia", "veredicto_abismal", "avatar_del_mar", "corona_de_coral");
-            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, BRIGID, CERNUNNOS, DAGDA -> new PathTheme("del florecimiento", "raiz_perenne", "espina_viviente", "salto_de_brote", "jardin_sagrado", "veredicto_de_raiz", "avatar_verdante", "corona_de_la_cosecha");
-            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, LUGH -> new PathTheme("del viento", "sendero_alado", "flecha_de_viento", "vuelo_del_mensajero", "cielo_personal", "veredicto_del_cazador", "avatar_alado", "corona_del_viajero");
-            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA -> new PathTheme("de la luz", "vista_inmortal", "rayo_solar", "ascenso_del_amanecer", "halo_personal", "veredicto_solar", "avatar_radiante", "corona_del_mediodia");
-            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN -> new PathTheme("de la sombra", "velo_perenne", "lanza_estigia", "ascenso_espectral", "niebla_personal", "veredicto_estigio", "avatar_del_inframundo", "corona_de_ceniza");
-            case ATHENA, HERA, COEUS, THEMIS, MNEMOSYNE, ODIN, ISIS, BASTET -> new PathTheme("del juicio", "mente_inmortal", "decreto_divino", "paso_tactico", "santuario_personal", "veredicto_de_la_ley", "avatar_de_marfil", "corona_del_consejo");
-            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> new PathTheme("de la forja", "corazon_de_brasa", "martillo_celeste", "salto_de_ascua", "forja_personal", "veredicto_de_acero", "avatar_de_bronce", "corona_del_yunque");
-            case APHRODITE, EROS, TYCHE, FREYJA -> new PathTheme("del encanto", "aura_favorable", "onda_de_gracia", "paso_afortunado", "jardin_de_gracia", "veredicto_del_destino", "avatar_de_rosa", "corona_de_la_fortuna");
+            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR, SUSANOO, MARDUK, SHIVA -> new PathTheme("del trueno", "corona_tonante", "lanza_del_cielo", "paso_del_rayo", "tempestad_personal", "veredicto_del_olimpo", "avatar_tonante", "trono_electrico");
+            case POSEIDON, OCEANUS, TETHYS, ENKI, TLALOC -> new PathTheme("de la marea", "pulmon_abismal", "tridente_de_ola", "salto_de_marea", "reino_de_lluvia", "veredicto_abismal", "avatar_del_mar", "corona_de_coral");
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, BRIGID, CERNUNNOS, DAGDA, INARI, XIPE_TOTEC -> new PathTheme("del florecimiento", "raiz_perenne", "espina_viviente", "salto_de_brote", "jardin_sagrado", "veredicto_de_raiz", "avatar_verdante", "corona_de_la_cosecha");
+            case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, LUGH, QUETZALCOATL, HANUMAN -> new PathTheme("del viento", "sendero_alado", "flecha_de_viento", "vuelo_del_mensajero", "cielo_personal", "veredicto_del_cazador", "avatar_alado", "corona_del_viajero");
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA, AMATERASU, HUITZILOPOCHTLI -> new PathTheme("de la luz", "vista_inmortal", "rayo_solar", "ascenso_del_amanecer", "halo_personal", "veredicto_solar", "avatar_radiante", "corona_del_mediodia");
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN, TSUKUYOMI, ERESHKIGAL, TEZCATLIPOCA -> new PathTheme("de la sombra", "velo_perenne", "lanza_estigia", "ascenso_espectral", "niebla_personal", "veredicto_estigio", "avatar_del_inframundo", "corona_de_ceniza");
+            case ATHENA, HERA, COEUS, THEMIS, MNEMOSYNE, ODIN, ISIS, BASTET, HACHIMAN, VISHNU, DURGA, GANESHA -> new PathTheme("del juicio", "mente_inmortal", "decreto_divino", "paso_tactico", "santuario_personal", "veredicto_de_la_ley", "avatar_de_marfil", "corona_del_consejo");
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, NERGAL -> new PathTheme("de la forja", "corazon_de_brasa", "martillo_celeste", "salto_de_ascua", "forja_personal", "veredicto_de_acero", "avatar_de_bronce", "corona_del_yunque");
+            case APHRODITE, EROS, TYCHE, FREYJA, ISHTAR -> new PathTheme("del encanto", "aura_favorable", "onda_de_gracia", "paso_afortunado", "jardin_de_gracia", "veredicto_del_destino", "avatar_de_rosa", "corona_de_la_fortuna");
         };
     }
 

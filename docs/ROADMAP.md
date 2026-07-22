@@ -11,10 +11,11 @@ No hay acceso directo de otros plugins a la base de DiosesDrakes. La integracion
 se realiza mediante el servicio Bukkit `DivineAccess`, eventos posteriores y
 configuracion versionada.
 
-## Escala hacia 1.000 habilidades
+## Escala superior a 1.000 habilidades
 
-Las 69 bendiciones iniciales son el catalogo de diseno. El objetivo de 1.000
-nodos se alcanza con definiciones YAML, no con 1.000 listeners Java:
+El catalogo contiene 1.080 nodos repartidos entre 72 patronos. La escala se
+alcanza con definiciones y familias de efecto reutilizables, no con 1.080
+listeners Java:
 
 1. Efectos reutilizables: aura, multiplicador, escaneo, movilidad, ritual,
    proteccion, conversion, recarga, invocacion y postura.
@@ -41,5 +42,6 @@ nodos se alcanza con definiciones YAML, no con 1.000 listeners Java:
    escaneo de minerales con protecciones, cooldown y auditoria.
 2. Economia: precios por percentil, mantenimiento semanal, tesoro y bridge sBank.
 3. Protecciones y PvPDivino: adaptadores regionales y arena sin poderes survival.
-4. Expandir dioses uno por uno, primero los que conectan con actividades reales.
-5. Migrar el catalogo a YAML y generar automaticamente GUI, guia y README.
+4. Equilibrar patronos uno por uno con telemetria real de uso y economia.
+5. Extraer definiciones a YAML cuando el esquema sea estable, manteniendo GUI,
+   guia y web derivadas del mismo contrato.

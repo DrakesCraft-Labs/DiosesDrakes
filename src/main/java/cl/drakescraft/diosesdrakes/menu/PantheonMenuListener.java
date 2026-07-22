@@ -48,7 +48,11 @@ public final class PantheonMenuListener implements Listener {
             } else if (event.getRawSlot() == 47) {
                 PantheonMenu.openGuide(player, profiles, skills);
             } else if (action != null) {
-                GodId.fromStorage(action).ifPresent(god -> chooseGod(player, god));
+                if (action.startsWith("PAGE:")) {
+                    openPage(player, action);
+                } else {
+                    GodId.fromStorage(action).ifPresent(god -> chooseGod(player, god));
+                }
             }
             return;
         }
@@ -61,6 +65,18 @@ public final class PantheonMenuListener implements Listener {
         } else if (action != null) {
             toggleSkill(player, action);
         }
+    }
+
+    private void openPage(org.bukkit.entity.Player player, String action) {
+        String[] parts = action.split(":", 3);
+        if (parts.length != 3) return;
+        PantheonId.fromStorage(parts[1]).ifPresent(pantheon -> {
+            try {
+                PantheonMenu.openDeities(player, pantheon, Integer.parseInt(parts[2]));
+            } catch (NumberFormatException ignored) {
+                player.sendMessage("No se pudo abrir esa pagina del panteon.");
+            }
+        });
     }
 
     private void chooseGod(org.bukkit.entity.Player player, GodId god) {

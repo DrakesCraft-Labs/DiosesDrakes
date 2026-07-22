@@ -467,7 +467,7 @@ public final class GenericDivineAbilityService implements Listener {
 
     /** Only wind patrons fly. Other domains receive movement matching their mythology. */
     private void grantMobility(Player player, GodId god, int seconds) {
-        if (switch (god) { case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN -> true; default -> false; }) {
+        if (switch (god) { case HERMES, ARTEMIS, SELENE, CRIUS, HEIMDALL, HORUS, MORRIGAN, QUETZALCOATL, HANUMAN -> true; default -> false; }) {
             grantFlight(player, god, seconds);
             return;
         }
@@ -662,12 +662,12 @@ public final class GenericDivineAbilityService implements Listener {
 
     private Domain domainFor(GodId god) {
         return switch (god) {
-            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR -> Domain.WEATHER;
-            case POSEIDON, OCEANUS, TETHYS -> Domain.WATER;
-            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE, BRIGID, CERNUNNOS, DAGDA, FREYJA -> Domain.GROWTH;
-            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA, HORUS -> Domain.LIGHT;
-            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN -> Domain.SHADOW;
-            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS -> Domain.FORGE;
+            case ZEUS, ARES, NIKE, NEMESIS, THOR, TYR, SUSANOO, MARDUK, SHIVA -> Domain.WEATHER;
+            case POSEIDON, OCEANUS, TETHYS, ENKI, TLALOC -> Domain.WATER;
+            case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE, BRIGID, CERNUNNOS, DAGDA, FREYJA, INARI, XIPE_TOTEC, ISHTAR -> Domain.GROWTH;
+            case APOLLO, HELIOS, HYPERION, THEIA, PHOEBE, RA, HORUS, AMATERASU, HUITZILOPOCHTLI -> Domain.LIGHT;
+            case HADES, HECATE, MORPHEUS, LOKI, ANUBIS, SET, MORRIGAN, TSUKUYOMI, ERESHKIGAL, TEZCATLIPOCA -> Domain.SHADOW;
+            case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, NERGAL -> Domain.FORGE;
             default -> Domain.WARD;
         };
     }

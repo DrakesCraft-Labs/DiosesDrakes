@@ -47,10 +47,107 @@ ArcanaDrakes may read the public `DivineAccess` Bukkit service to display a play
 
 Routine balance belongs in `plugins/DiosesDrakes/config.yml`: economy/upkeep, Convergence anchors, boss-favor multipliers, protection integration and enabled subsystems. Keep secrets and production databases out of Git.
 
-```bash
-mvn test
-mvn package
+**Asgard:** Thor, Odin, Loki, Heimdall, Freyja y Tyr. **Duat:** Ra, Anubis, Isis,
+Set, Bastet y Horus. **Tuatha de Danann:** Morrigan, Lugh, Brigid, Cernunnos y
+Dagda. La Convergencia tambien abre **Takamagahara** con Amaterasu, Susanoo,
+Tsukuyomi, Inari y Hachiman; **Ekur** con Marduk, Ishtar, Enki, Ereshkigal y
+Nergal; **Teteocan** con Quetzalcoatl, Huitzilopochtli, Tlaloc, Tezcatlipoca y
+Xipe Totec; y **Devaloka** con Shiva, Vishnu, Durga, Ganesha y Hanuman.
+
+Cada patron dispone de quince nodos encadenados: cuatro **pasivas equipables**, siete
+**activas** y cuatro **posturas temporales**. La carga final se limita a dos pasivas,
+dos activas y una postura; desbloquear toda una rama no permite llevar todos los
+poderes al mismo tiempo.
+
+## Reglas de progreso
+
+- Solo puede haber un dios activo por jugador.
+- Renunciar elimina el progreso del dios actual y activa 48 horas de espera.
+- El nuevo dios siempre comienza desde cero.
+- Las bendiciones suspendidas por falta de pago conservan progreso durante la gracia.
+- Nunca se venden poderes de progresion o combate mediante Tebex.
+
+## Modos de combate
+
+En PvP normal las bendiciones divinas permanecen desactivadas. `PvPDivino` sera una
+arena separada. Sus poderes son de combate y el progreso se obtiene jugando,
+nunca comprandolo con dinero.
+
+## Seguridad y protecciones
+
+Los poderes no pueden romper, usar, abrir ni atravesar territorios ajenos. Las
+integraciones Slimefun se habilitan por listas explicitas: una habilidad no obtiene
+acceso a una maquina, receta o red por existir; debe estar autorizada en configuracion.
+
+`Pulso de Red` añade energia limitada a maquinas Slimefun expresamente permitidas
+en `config.yml`, dentro del alcance y autorizacion del jugador. La lista inicial se
+limita a la Mass Fabricator y al UU Crafter de LiteXpansion: consumidores de 16.666
+y 50.000 J/s, respectivamente. No energiza generadores, baterias ni maquinas de la
+linea Infinity/Cheat. `Ojo de Mena` marca
+en el cliente una cantidad limitada de minerales durante ocho segundos, solo en
+chunks cargados y donde WorldGuard permite interactuar. Ninguno modifica bloques,
+inventarios ni protecciones.
+
+Los veredictos y descargas primero descartan criaturas en claims ajenos mediante la
+misma consulta de WorldGuard que protege las mutaciones de bloque. Las explosiones
+divinas son solo particulas, sonido y displays: no invocan TNT ni `createExplosion`,
+no rompen bloques, no incendian y no empujan jugadores.
+
+## Hefesto: uso actual
+
+1. Selecciona a Hefesto en `/dioses`.
+2. Compra el primer nodo desde el menu o con `/dioses desbloquear hephaestus.forja_viva`.
+3. Equipa una bendicion con el menu o `/dioses equipar <id>`.
+4. Activa los poderes con `/dioses usar hephaestus.pulso_de_red` o
+   `/dioses usar hephaestus.ojo_de_mena`.
+
+## Códice y feedback
+
+`/dioses libro` entrega el **Códice Divino**. El libro no conserva permisos ni
+progreso: solamente explica la senda activa del jugador y puede pedirse de nuevo
+sin riesgo. Para consultar cualquier nodo puntual existe `/dioses info <id>`.
+
+Las activaciones muestran duración y recarga en la barra de acción. Cada familia
+divina tiene partículas, color, sonido y escenas nativas de Paper con `BlockDisplay`;
+las descargas forman una detonación visual, los dominios trazan un anillo animado,
+el vuelo deja estela y los avatares reciben halo. Las escenas no requieren resource
+pack, se limitan a ocho displays por jugador y se limpian al terminar, desconectar o
+deshabilitar el plugin. Con Floodgate, Bedrock conserva sonidos y particulas; los
+displays quedan desactivados por defecto hasta validarlos en movil. Hefesto además muestra la energía
+que logró inyectar en cada pulso. El menú del panteón deja visible el tipo del nodo,
+su nivel, coste, prerrequisitos, duración y recarga antes de comprarlo.
+
+## Arbol divino
+
+Los 72 patronos de los ocho panteones suman **1.080 nodos jugables**. Estos nodos
+combinan identidades propias con familias de efecto auditables; no son 1.080
+listeners independientes. Los hitos de ascension son
+mecánicas reales: descargas sin daño de bloque, movilidad que solo permite vuelo a
+patronos de viento, dominios personales de clima, crecimiento de cultivos y saplings
+dentro de claims autorizados, veredictos PvE de 100 de daño y avatares colosales
+temporales. Los cinco nodos de maestria final agregan puños con mano vacia, arco de
+espada, golpe de hacha o maza, estocada de lanza, carrera y guardia reactiva contra
+criaturas. Nada de esto puede golpear jugadores en survival normal; PvPDivino
+mantiene su propio control regional.
+
+La referencia jugable para la comunidad se publica en
+`https://web.drakescraft.cl/dioses.html`. Al cambiar `SkillCatalog`, actualiza la
+página pública en el mismo cambio para que el juego y su documentación no diverjan.
+
+Las compras pasan por Vault, quedan en `plugins/DiosesDrakes/audit/` y se recuperan
+por identificador si una operacion debe reintentarse. El mantenimiento se revisa al
+conectar y cada cinco minutos; tras las 24 horas de gracia, las bendiciones se
+suspenden sin borrar progreso hasta el siguiente pago exitoso.
+
+## Desarrollo
+
+Requisitos: Java 21 y un servidor Paper/Purpur compatible con 1.21.11.
+
+```powershell
+mvn clean package
 ```
+
+Routine balance belongs in `plugins/DiosesDrakes/config.yml`: economy/upkeep, Convergence anchors, boss-favor multipliers, protection integration and enabled subsystems. Keep secrets and production databases out of Git.
 
 Back up the current JAR, config and `diosesdrakes.db` before deployment. Replace one JAR during a planned restart, then verify startup logs, `/dioses ayuda`, `/dioses estado`, an active skill menu and a non-commercial boss reward test.
 

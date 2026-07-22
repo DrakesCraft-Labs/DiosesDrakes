@@ -8,7 +8,11 @@ public enum PantheonId {
     GREEK("Olimpo y Titanes", "Orden, destino, mar, guerra y submundo."),
     NORDIC("Asgard", "Runas, juramentos, tormenta, caceria y Ragnarok."),
     EGYPTIAN("Duat", "Sol, juicio, muerte, desierto y renacimiento."),
-    CELTIC("Tuatha de Danann", "Naturaleza viva, bruma, caza y pactos." );
+    CELTIC("Tuatha de Danann", "Naturaleza viva, bruma, caza y pactos."),
+    JAPANESE("Takamagahara", "Kami, honor, mareas, luna y renovacion."),
+    MESOPOTAMIAN("Ekur", "Estrellas, ciudades, rios, guerra y mundo inferior."),
+    AZTEC("Teteocan", "Sol, lluvia, viento, ciclos y sacrificio simbolico."),
+    HINDU("Devaloka", "Deber, preservacion, transformacion y valor." );
 
     private final String displayName;
     private final String description;

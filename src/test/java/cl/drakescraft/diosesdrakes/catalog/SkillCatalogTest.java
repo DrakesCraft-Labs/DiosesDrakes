@@ -16,6 +16,12 @@ class SkillCatalogTest {
     }
 
     @Test
+    void completeConvergenceExceedsOneThousandDocumentedNodes() {
+        assertEquals(GodId.values().length * 15, SkillCatalog.all().size());
+        assertTrue(SkillCatalog.all().size() >= 1_000);
+    }
+
+    @Test
     void everyPermanentPantheonHasDistinctPatronsAndCompleteBranches() {
         for (var pantheon : cl.drakescraft.diosesdrakes.model.PantheonId.values()) {
             var patrons = java.util.Arrays.stream(GodId.values()).filter(god -> god.pantheon() == pantheon).toList();
