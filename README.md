@@ -44,6 +44,6 @@ Ubica el archivo compilado `DiosesDrakes.jar` en la carpeta `plugins/` de tu ser
 
 <div align="center">
 
-**DrakesCraft Labs** · Mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1)
+**DrakesCraft Labs** · Maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1)
 
 </div>
