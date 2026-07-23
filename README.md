@@ -19,7 +19,7 @@
 
 ## ⚡ ¿Qué es DiosesDrakes?
 
-`DiosesDrakes` es el plugin del Panteón de Dioses Míticos de DrakesCraft. Permite a los jugadores jurar lealtad a deidades griegas y nórdicas (Zeus, Ares, Poseidón, Hades, Odin, Loki, etc.), construir **altares sagrados**, realizar ofrendas y recibir bendiciones pasivas y activas.
+`DiosesDrakes` es el plugin del Panteón de Dioses Míticos de DrakesCraft. Permite a los players jurar lealtad a deidades griegas y nórdicas (Zeus, Ares, Poseidón, Hades, Odin, Loki, etc.), construir **altares sagrados**, realizar ofrendas y recibir bendiciones pasivas y activas.
 
 ---
 
@@ -38,12 +38,12 @@
 mvn clean package
 ```
 
-Ubica el archivo compilado `DiosesDrakes.jar` en la carpeta `plugins/` de tu servidor Minecraft Paper/Purpur 1.21.11.
+Ubica el archivo compilado `DiosesDrakes.jar` en la folder `plugins/` de tu servidor Minecraft Paper/Purpur 1.21.11.
 
 ---
 
 <div align="center">
 
-**DrakesCraft Labs** · Maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1)
+**DrakesCraft Labs** · Mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1)
 
 </div>
