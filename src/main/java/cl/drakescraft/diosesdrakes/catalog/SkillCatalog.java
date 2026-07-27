@@ -142,10 +142,42 @@ public final class SkillCatalog {
         add(skills, GodId.TETHYS, "fuente_nutricia", SkillType.PASSIVE, "Mejora respiracion y recuperacion al estar en agua.", 0, 0, 1);
         add(skills, GodId.TETHYS, "manantial", SkillType.ACTIVE, "Restaura hambre limitada y limpia efectos de calor propios.", 180, 1, 2);
         add(skills, GodId.TETHYS, "cauce", SkillType.STANCE, "Postura acuatica de movilidad y resistencia ambiental.", 240, 30, 3);
+        addEgyptianHighPantheon(skills);
         addFoundationalBranchesForArrivingPantheons(skills);
         expandEveryBranch(skills);
         extendCombatMastery(skills);
         return List.copyOf(skills);
+    }
+
+    /** Gives the hidden Egyptian arc its own costly, three-step opening path. */
+    private static void addEgyptianHighPantheon(List<SkillDefinition> skills) {
+        add(skills, GodId.RA, "ojo_del_sol", SkillType.PASSIVE,
+                "El ojo que recuerda el amanecer. Su luz revela la senda oculta de Ra.", 0, 0, 1, 2_500_000, List.of());
+        add(skills, GodId.RA, "lanza_solar", SkillType.ACTIVE,
+                "Condensa un sol blanco contra una criatura hostil, sin incendiar el mundo.", 240, 4, 2, 7_500_000, List.of("ra.ojo_del_sol"));
+        add(skills, GodId.RA, "barca_del_amanecer", SkillType.STANCE,
+                "La barca solar rodea al portador: fuerza, resistencia y una corona visible.", 900, 30, 3, 15_000_000, List.of("ra.lanza_solar"));
+
+        add(skills, GodId.ISIS, "manto_de_isis", SkillType.PASSIVE,
+                "El velo de la gran maga conserva la vida y esconde un nombre prohibido.", 0, 0, 1, 2_500_000, List.of());
+        add(skills, GodId.ISIS, "alas_de_sanacion", SkillType.ACTIVE,
+                "Despliega alas espectrales y restaura a los aliados cercanos sin afectar enemigos.", 300, 8, 2, 7_500_000, List.of("isis.manto_de_isis"));
+        add(skills, GodId.ISIS, "trono_de_magia", SkillType.STANCE,
+                "Un santuario temporal de Isis protege al grupo y limpia la oscuridad propia.", 900, 30, 3, 15_000_000, List.of("isis.alas_de_sanacion"));
+
+        add(skills, GodId.ANUBIS, "balanza_del_corazon", SkillType.PASSIVE,
+                "Anubis pesa cada acto. Las criaturas hostiles sienten el juicio del Duat.", 0, 0, 1, 2_500_000, List.of());
+        add(skills, GodId.ANUBIS, "juicio_del_duat", SkillType.ACTIVE,
+                "Marca una criatura hostil con almas y reduce su fuerza durante el veredicto.", 300, 6, 2, 7_500_000, List.of("anubis.balanza_del_corazon"));
+        add(skills, GodId.ANUBIS, "puerta_del_duat", SkillType.STANCE,
+                "Abre una puerta visual al inframundo: sigilo, resistencia y visión de almas.", 900, 30, 3, 15_000_000, List.of("anubis.juicio_del_duat"));
+
+        add(skills, GodId.SET, "aliento_del_caos", SkillType.PASSIVE,
+                "El desierto susurra al portador. El caos permanece encerrado bajo su voluntad.", 0, 0, 1, 2_500_000, List.of());
+        add(skills, GodId.SET, "tempestad_de_arena", SkillType.ACTIVE,
+                "Una tormenta de arena ciega y frena a las criaturas hostiles en un radio breve.", 300, 7, 2, 7_500_000, List.of("set.aliento_del_caos"));
+        add(skills, GodId.SET, "trono_del_desierto", SkillType.STANCE,
+                "El desierto se alza alrededor del portador: velocidad, fuerza y resistencia al caos.", 900, 30, 3, 15_000_000, List.of("set.tempestad_de_arena"));
     }
 
     /** Gives every arriving deity a concrete first active, passive and stance before shared ascension begins. */

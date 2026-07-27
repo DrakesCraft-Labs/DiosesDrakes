@@ -2,6 +2,7 @@ package cl.drakescraft.diosesdrakes.service;
 
 import cl.drakescraft.diosesdrakes.catalog.SkillCatalog;
 import cl.drakescraft.diosesdrakes.model.DivineProfile;
+import cl.drakescraft.diosesdrakes.model.PantheonId;
 import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -45,6 +46,9 @@ public final class DivineCodexService {
                 ? "Aun no has elegido patron. Abre /dioses para conocer el panteon."
                 : profile.activeGod().displayName() + " te ha elegido. Las siguientes paginas resumen tus tres nodos.")));
         if (profile.activeGod() != null) {
+            if (profile.activeGod().pantheon() == PantheonId.EGYPTIAN) {
+                pages.add(Component.text("FRAGMENTO SELLADO\n\nRa no fue el primero en despertar. Isis guarda el nombre que falta, Anubis pesa a quienes lo pronuncian y Set conoce la puerta que no debe abrirse.\n\nBusca cuatro ofrendas bajo el sol, la luna, la arena y la muerte. No preguntes por que sus sendas cuestan mas que las demas."));
+            }
             for (SkillDefinition skill : SkillCatalog.forGod(profile.activeGod())) {
                 pages.add(Component.text(skill.name().toUpperCase() + "\n\n" + skill.description() + "\n\n"
                         + skill.informationLine() + "\nCosto: " + Math.round(skill.unlockCost()) + " Dragmas\n"

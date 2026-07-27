@@ -275,20 +275,28 @@ public final class DivineCinematicService implements Listener {
 
     private Material materialFor(GodId god) {
         return switch (god) {
+            case RA -> Material.GOLD_BLOCK;
+            case ISIS -> Material.QUARTZ_BLOCK;
+            case ANUBIS -> Material.BLACK_CONCRETE;
+            case SET -> Material.RED_SANDSTONE;
             case POSEIDON, OCEANUS, TETHYS -> Material.PRISMARINE;
             case DEMETER, PERSEPHONE, DIONYSUS, RHEA, APHRODITE, EROS, TYCHE, BRIGID, CERNUNNOS, DAGDA -> Material.MOSS_BLOCK;
-            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE, LOKI, ANUBIS, SET, MORRIGAN -> Material.CRYING_OBSIDIAN;
+            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE, LOKI, MORRIGAN -> Material.CRYING_OBSIDIAN;
             case HEPHAESTUS, HESTIA, IAPETUS, CRONUS, THOR -> Material.COPPER_BLOCK;
-            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA, ARES, NIKE, NEMESIS, RA, HORUS, HEIMDALL, TYR, ODIN -> Material.AMETHYST_BLOCK;
+            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA, ARES, NIKE, NEMESIS, HORUS, HEIMDALL, TYR, ODIN -> Material.AMETHYST_BLOCK;
             default -> Material.SEA_LANTERN;
         };
     }
 
     private Color colorFor(GodId god) {
         return switch (god) {
+            case RA -> Color.fromRGB(255, 176, 32);
+            case ISIS -> Color.fromRGB(224, 245, 255);
+            case ANUBIS -> Color.fromRGB(82, 42, 145);
+            case SET -> Color.fromRGB(210, 76, 31);
             case POSEIDON, OCEANUS, TETHYS -> Color.fromRGB(54, 185, 255);
-            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA, THOR, RA, HORUS -> Color.fromRGB(255, 213, 92);
-            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE, LOKI, ANUBIS, SET, MORRIGAN -> Color.fromRGB(164, 109, 255);
+            case ZEUS, APOLLO, HELIOS, HYPERION, THEIA, THOR, HORUS -> Color.fromRGB(255, 213, 92);
+            case HADES, HECATE, MORPHEUS, SELENE, PHOEBE, LOKI, MORRIGAN -> Color.fromRGB(164, 109, 255);
             case DEMETER, RHEA, DIONYSUS, PERSEPHONE, BRIGID, CERNUNNOS, DAGDA -> Color.fromRGB(112, 221, 112);
             case ARES, NEMESIS, NIKE, TYR -> Color.fromRGB(241, 94, 94);
             default -> Color.fromRGB(233, 228, 255);

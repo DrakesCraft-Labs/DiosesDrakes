@@ -7,6 +7,7 @@ import cl.drakescraft.diosesdrakes.model.SkillDefinition;
 import cl.drakescraft.diosesdrakes.model.SkillType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 import org.bukkit.Particle;
@@ -148,6 +149,9 @@ public final class GenericDivineAbilityService implements Listener {
 
     /** Preserves the early branches while turning tiers four through nine into distinct power milestones. */
     private void apply(Player player, SkillDefinition skill, int seconds) {
+        if (applyEgyptianSignature(player, skill, seconds)) {
+            return;
+        }
         if (skill.tier() >= 11) {
             applyCombat(player, skill, seconds);
             return;
@@ -174,6 +178,96 @@ public final class GenericDivineAbilityService implements Listener {
         if (skill.id().equals("hermes.ascenso_de_icaro")) {
             grantFlight(player, skill.god(), Math.min(seconds, 4));
         }
+    }
+
+    /** Executes the high-pantheon Egyptian signatures before generic progression effects. */
+    private boolean applyEgyptianSignature(Player player, SkillDefinition skill, int seconds) {
+        switch (skill.id()) {
+            case "ra.lanza_solar" -> {
+                Monster target = nearestAllowedMonster(player, 18.0D);
+                if (target != null) {
+                    target.damage(42.0D, player);
+                    target.setFireTicks(Math.max(target.getFireTicks(), 80));
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, seconds * 20, 0, true, true, true));
+                    target.getWorld().strikeLightningEffect(target.getLocation());
+                }
+                egyptianVisual(player, Color.fromRGB(255, 214, 77), Particle.FLAME, Sound.ITEM_TRIDENT_THUNDER, "La lanza solar ha elegido un objetivo.");
+                return true;
+            }
+            case "ra.barca_del_amanecer" -> {
+                effects(player, seconds, 1, PotionEffectType.STRENGTH, PotionEffectType.RESISTANCE,
+                        PotionEffectType.FIRE_RESISTANCE, PotionEffectType.GLOWING);
+                egyptianVisual(player, Color.fromRGB(255, 214, 77), Particle.END_ROD, Sound.BLOCK_BEACON_ACTIVATE, "La barca del amanecer navega sobre ti.");
+                return true;
+            }
+            case "isis.alas_de_sanacion" -> {
+                player.getWorld().getNearbyEntities(player.getLocation(), 10.0D, 5.0D, 10.0D,
+                                entity -> entity instanceof Player && protections.canAffect(player, entity.getLocation()))
+                        .forEach(entity -> {
+                            Player ally = (Player) entity;
+                            AttributeInstance maxHealth = ally.getAttribute(Attribute.MAX_HEALTH);
+                            if (maxHealth != null) ally.setHealth(Math.min(maxHealth.getValue(), ally.getHealth() + 8.0D));
+                            ally.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, seconds * 20, 1, true, true, true));
+                            ally.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, seconds * 20, 1, true, true, true));
+                        });
+                egyptianVisual(player, Color.fromRGB(235, 235, 255), Particle.HEART, Sound.BLOCK_BEACON_POWER_SELECT, "Las alas de Isis restauran a los aliados.");
+                return true;
+            }
+            case "isis.trono_de_magia" -> {
+                effects(player, seconds, 1, PotionEffectType.REGENERATION, PotionEffectType.RESISTANCE,
+                        PotionEffectType.ABSORPTION, PotionEffectType.NIGHT_VISION);
+                egyptianVisual(player, Color.fromRGB(235, 235, 255), Particle.ENCHANT, Sound.BLOCK_ENCHANTMENT_TABLE_USE, "El trono de Isis ha despertado.");
+                return true;
+            }
+            case "anubis.juicio_del_duat" -> {
+                Monster target = nearestAllowedMonster(player, 16.0D);
+                if (target != null) {
+                    target.damage(28.0D, player);
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, seconds * 20, 2, true, true, true));
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, seconds * 20, 3, true, true, true));
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, seconds * 20, 0, true, true, true));
+                }
+                egyptianVisual(player, Color.fromRGB(77, 20, 110), Particle.SOUL_FIRE_FLAME, Sound.ENTITY_WITHER_SPAWN, "La balanza del Duat ha dictado sentencia.");
+                return true;
+            }
+            case "anubis.puerta_del_duat" -> {
+                effects(player, seconds, 1, PotionEffectType.INVISIBILITY, PotionEffectType.RESISTANCE,
+                        PotionEffectType.NIGHT_VISION, PotionEffectType.SLOW_FALLING);
+                egyptianVisual(player, Color.fromRGB(77, 20, 110), Particle.SOUL, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, "La puerta del Duat se abre detrás de ti.");
+                return true;
+            }
+            case "set.tempestad_de_arena" -> {
+                player.getWorld().getNearbyEntities(player.getLocation(), 10.0D, 4.0D, 10.0D,
+                                entity -> entity instanceof Monster && protections.canAffect(player, entity.getLocation()))
+                        .forEach(entity -> {
+                            Monster monster = (Monster) entity;
+                            monster.damage(14.0D, player);
+                            monster.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, seconds * 20, 0, true, true, true));
+                            monster.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, seconds * 20, 2, true, true, true));
+                        });
+                egyptianVisual(player, Color.fromRGB(207, 126, 48), Particle.DUST, Sound.ENTITY_RAVAGER_ROAR, "La tempestad de arena obedece a Set.");
+                return true;
+            }
+            case "set.trono_del_desierto" -> {
+                effects(player, seconds, 1, PotionEffectType.STRENGTH, PotionEffectType.SPEED,
+                        PotionEffectType.RESISTANCE, PotionEffectType.FIRE_RESISTANCE);
+                egyptianVisual(player, Color.fromRGB(207, 126, 48), Particle.ASH, Sound.ENTITY_ELDER_GUARDIAN_CURSE, "El trono del desierto se ha alzado.");
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    /** Renders Egyptian signatures without spawning persistent entities or editing terrain. */
+    private void egyptianVisual(Player player, Color color, Particle particle, Sound sound, String message) {
+        Location center = player.getLocation().add(0, 1.0D, 0);
+        player.getWorld().spawnParticle(Particle.DUST, center, 42, 1.2D, 1.0D, 1.2D, 0,
+                new Particle.DustOptions(color, 1.4F));
+        player.getWorld().spawnParticle(particle, center, 48, 1.0D, 1.2D, 1.0D, 0.08D);
+        player.getWorld().playSound(player.getLocation(), sound, 1.4F, 0.75F);
+        player.sendActionBar(Component.text(message));
     }
 
     /** Runs the endgame tiers: strike, travel, domain, execution and avatar. */
