@@ -81,6 +81,10 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             codex.give(player);
             return true;
         }
+        if (args.length == 1 && (args[0].equalsIgnoreCase("ayuda") || args[0].equalsIgnoreCase("guia"))) {
+            PantheonMenu.openGuide(player, profiles, skills);
+            return true;
+        }
         if (args.length == 1 && (args[0].equalsIgnoreCase("estado") || args[0].equalsIgnoreCase("favor"))) {
             showStatus(player);
             return true;
@@ -121,7 +125,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("estado", "favor", "info", "desbloquear", "equipar", "desequipar", "usar", "libro", "renunciar", "ancla");
+            return List.of("estado", "favor", "ayuda", "info", "desbloquear", "equipar", "desequipar", "usar", "libro", "renunciar", "ancla");
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("desbloquear")
                 || args[0].equalsIgnoreCase("equipar") || args[0].equalsIgnoreCase("desequipar")

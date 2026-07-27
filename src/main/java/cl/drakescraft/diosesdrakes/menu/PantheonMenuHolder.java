@@ -30,6 +30,7 @@ public final class PantheonMenuHolder implements InventoryHolder {
     public enum View {
         PANTHEONS,
         DEITIES,
-        SKILLS
+        SKILLS,
+        GUIDE
     }
 }

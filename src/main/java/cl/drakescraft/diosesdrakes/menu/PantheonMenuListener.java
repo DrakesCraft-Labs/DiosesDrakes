@@ -35,7 +35,9 @@ public final class PantheonMenuListener implements Listener {
         }
         String action = holder.actionAt(event.getRawSlot());
         if (holder.view() == PantheonMenuHolder.View.PANTHEONS) {
-            if (action != null) {
+            if (event.getRawSlot() == 22) {
+                PantheonMenu.openGuide(player, profiles, skills);
+            } else if (action != null) {
                 PantheonId.fromStorage(action).ifPresent(pantheon -> PantheonMenu.openDeities(player, pantheon));
             }
             return;
@@ -43,12 +45,20 @@ public final class PantheonMenuListener implements Listener {
         if (holder.view() == PantheonMenuHolder.View.DEITIES) {
             if (event.getRawSlot() == 49) {
                 PantheonMenu.open(player, profiles, skills);
+            } else if (event.getRawSlot() == 47) {
+                PantheonMenu.openGuide(player, profiles, skills);
             } else if (action != null) {
                 GodId.fromStorage(action).ifPresent(god -> chooseGod(player, god));
             }
             return;
         }
-        if (action != null) {
+        if (holder.view() == PantheonMenuHolder.View.GUIDE) {
+            if (event.getRawSlot() == 49) PantheonMenu.open(player, profiles, skills);
+            return;
+        }
+        if (event.getRawSlot() == 47) {
+            PantheonMenu.openGuide(player, profiles, skills);
+        } else if (action != null) {
             toggleSkill(player, action);
         }
     }

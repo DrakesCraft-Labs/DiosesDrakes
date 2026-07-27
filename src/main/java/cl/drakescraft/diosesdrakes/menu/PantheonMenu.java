@@ -63,7 +63,9 @@ public final class PantheonMenu {
                 "§7Un patrón activo dentro de un panteón.",
                 "§cRenunciar borra favor, nodos y reliquias de esa senda.",
                 "§eEl cooldown de cambio es de 48 horas.",
-                "§bLas áncoras son públicas y persistentes."
+                "§bLas áncoras son públicas y persistentes.",
+                "",
+                "§a§l▶ Clic para entender el sistema."
         )));
         player.openInventory(inventory);
     }
@@ -95,6 +97,7 @@ public final class PantheonMenu {
             )));
         }
         inventory.setItem(49, item(Material.ARROW, "Volver a panteones", List.of("Clic para regresar.")));
+        inventory.setItem(47, item(Material.KNOWLEDGE_BOOK, "§e§lGuía divina", List.of("§7Patrones, favor, habilidades y anclas.", "§a§l▶ Clic para abrir.")));
         player.openInventory(inventory);
     }
 
@@ -137,6 +140,54 @@ public final class PantheonMenu {
                 "§7Elimina todo tu progreso actual en esta senda.",
                 "§cUsar comando: §f/dioses renunciar confirmar"
         )));
+        inventory.setItem(47, item(Material.KNOWLEDGE_BOOK, "§e§lGuía divina", List.of("§7Cómo desbloquear y equipar habilidades.", "§a§l▶ Clic para abrir.")));
+        player.openInventory(inventory);
+    }
+
+    /** Explains the persistent divine loop before the player commits to a patron or a purchase. */
+    public static void openGuide(Player player, ProfileService profiles, SkillService skills) {
+        Inventory inventory = Bukkit.createInventory(new PantheonMenuHolder(PantheonMenuHolder.View.GUIDE, Map.of()), 54,
+                Component.text("§0§lGuía de la Convergencia"));
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            inventory.setItem(slot, item(Material.BLACK_STAINED_GLASS_PANE, " ", List.of()));
+        }
+        inventory.setItem(10, item(Material.NETHER_STAR, "§6§l1. Elige un patrón", List.of(
+                "§7Abre /dioses para explorar los cuatro panteones.",
+                "§7Elige una deidad y comienza una senda.",
+                "§cRenunciar borra favor, nodos y reliquias de esa senda."
+        )));
+        inventory.setItem(12, item(Material.GOLD_INGOT, "§e§l2. Desbloquea y equipa", List.of(
+                "§7Cada patrón tiene habilidades con requisitos.",
+                "§7Desbloquea nodos y equipa solo los que vas a usar.",
+                "§7Las pasivas y activas indican su efecto en el lore."
+        )));
+        inventory.setItem(14, item(Material.HEART_OF_THE_SEA, "§b§l3. Gana favor", List.of(
+                "§7Los bosses de Odysseia entregan favor una vez por victoria.",
+                "§7El favor pertenece a tu patrón; Arcana no lo crea ni lo consume.",
+                "§7Consulta /dioses estado para revisar tu senda."
+        )));
+        inventory.setItem(16, item(Material.CLOCK, "§d§l4. Mantén tu senda", List.of(
+                "§7El mantenimiento semanal solo aplica si está activado.",
+                "§7Una senda suspendida no permite usar bendiciones.",
+                "§7Cambiar de patrón tiene un cooldown de 48 horas."
+        )));
+        inventory.setItem(29, item(Material.LODESTONE, "§6§lAnclas de la Convergencia", List.of(
+                "§7Las anclas son puntos públicos permanentes.",
+                "§7Ofrece favor con /dioses ancla ofrendar <id> <favor>.",
+                "§7No reclaman ni modifican bloques."
+        )));
+        inventory.setItem(31, item(Material.SHIELD, "§a§lSeguridad", List.of(
+                "§7Las habilidades ofensivas respetan los límites del servidor.",
+                "§7La arena divina es el lugar previsto para PvP especial.",
+                "§7Las protecciones siguen siendo el límite por defecto."
+        )));
+        inventory.setItem(33, item(Material.WRITTEN_BOOK, "§f§lComandos útiles", List.of(
+                "§e/dioses §7abre tu senda.",
+                "§e/dioses estado §7muestra patrón, favor y mantenimiento.",
+                "§e/dioses libro §7entrega el códice.",
+                "§e/dioses ayuda §7vuelve a esta guía."
+        )));
+        inventory.setItem(49, item(Material.ARROW, "§e§lAbrir panteones", List.of("§7Explora patrones y habilidades.", "§a§l▶ Clic para continuar.")));
         player.openInventory(inventory);
     }
 
