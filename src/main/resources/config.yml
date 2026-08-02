@@ -92,3 +92,6 @@ visuals:
     bedrock-enabled: false
     max-displays-per-scene: 8
     view-range: 32
+casting:
+  # El Foco Divino evita que ataques mitologicos interfieran con bloques, menus o maquinas.
+  focus-material: AMETHYST_SHARD

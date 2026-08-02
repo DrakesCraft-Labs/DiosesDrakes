@@ -24,7 +24,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -33,6 +40,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,6 +53,8 @@ public final class GenericDivineAbilityService implements Listener {
     private final ProtectionGate protections;
     private final DivineCinematicService cinematics;
     private final DivineAbilityAuditLogger audit;
+    private final NamespacedKey divineFocusKey;
+    private final Material focusMaterial;
     private final Map<UUID, FlightState> flights = new HashMap<>();
     private final Map<UUID, AvatarState> avatars = new HashMap<>();
     private final Map<UUID, GuardState> guards = new HashMap<>();
@@ -64,10 +74,61 @@ public final class GenericDivineAbilityService implements Listener {
                 (float) plugin.getConfig().getDouble("visuals.display-entities.view-range", 32.0D)
         );
         this.audit = new DivineAbilityAuditLogger(plugin.getDataFolder().toPath().resolve("audit"));
+        this.divineFocusKey = new NamespacedKey(plugin, "divine_focus");
+        this.focusMaterial = resolveFocusMaterial(plugin.getConfig().getString("casting.focus-material", "AMETHYST_SHARD"));
     }
 
     public DivineCinematicService cinematics() {
         return cinematics;
+    }
+
+    /** Gives the opt-in casting tool so normal tools and Slimefun blocks keep their native interactions. */
+    public void giveFocus(Player player) {
+        ItemStack focus = new ItemStack(focusMaterial);
+        ItemMeta meta = focus.getItemMeta();
+        meta.displayName(Component.text("Foco Divino"));
+        meta.lore(List.of(
+                Component.text("Clic derecho al aire: habilidad primaria."),
+                Component.text("Agachado + clic derecho: habilidad secundaria.")
+        ));
+        meta.getPersistentDataContainer().set(divineFocusKey, PersistentDataType.BYTE, (byte) 1);
+        focus.setItemMeta(meta);
+        player.getInventory().addItem(focus).values().forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
+        player.sendMessage(Component.text("Recibiste tu Foco Divino. Equipa habilidades desde /dioses."));
+    }
+
+    /** Casts equipped active powers through a dedicated item, never through normal block interaction. */
+    @EventHandler(ignoreCancelled = true)
+    public void onFocusUse(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND || event.getAction() != Action.RIGHT_CLICK_AIR || !isFocus(event.getItem())) {
+            return;
+        }
+        Player player = event.getPlayer();
+        List<SkillDefinition> activeSkills = skills.equippedUsable(player.getUniqueId()).stream()
+                .filter(skill -> skill.type() != SkillType.PASSIVE)
+                .sorted(Comparator.comparingInt(SkillDefinition::tier).thenComparing(SkillDefinition::id))
+                .toList();
+        if (activeSkills.isEmpty()) {
+            player.sendActionBar(Component.text("Equipa una habilidad activa o de postura en /dioses."));
+            return;
+        }
+        int slot = player.isSneaking() && activeSkills.size() > 1 ? 1 : 0;
+        SkillDefinition skill = activeSkills.get(slot);
+        UseResult result = use(player, skill.id());
+        if (!result.started()) {
+            player.sendActionBar(Component.text(result.message()));
+        }
+        event.setCancelled(true);
+    }
+
+    private boolean isFocus(ItemStack item) {
+        return item != null && item.hasItemMeta()
+                && item.getItemMeta().getPersistentDataContainer().has(divineFocusKey, PersistentDataType.BYTE);
+    }
+
+    private Material resolveFocusMaterial(String configuredMaterial) {
+        Material resolved = Material.matchMaterial(configuredMaterial == null ? "" : configuredMaterial);
+        return resolved != null && resolved.isItem() ? resolved : Material.AMETHYST_SHARD;
     }
 
     /** Cleans temporary flight, avatar and display state before a plugin reload or shutdown. */
