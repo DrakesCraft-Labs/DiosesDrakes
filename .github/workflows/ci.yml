@@ -23,6 +23,12 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Preparar API de DrakesBosses
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/DrakesCraft-Labs/DrakesBosses.git ../DrakesBosses
+          mvn -B -ntp -f ../DrakesBosses/pom.xml install -DskipTests
+
       - name: Compilar y ejecutar pruebas
         run: mvn -B -ntp clean verify
 
