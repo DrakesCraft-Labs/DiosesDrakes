@@ -39,7 +39,10 @@ convergence:
     arena-only: true
     region-id: pvpdivino
 integrations:
-  odysseia:
+  # DrakesBosses publishes BossVictoryEvent after it has resolved loot.
+  # Existing deployments using integrations.odysseia.boss-rewards are read once
+  # as a backwards-compatible fallback, but new configuration belongs here.
+  drakesbosses:
     boss-rewards:
       enabled: true
       base-favor: 60
@@ -52,7 +55,7 @@ integrations:
         kratos: 1.8
         tifon: 2.0
       # Un patron gana favor extra cuando derrota un boss de su propio panteon.
-      # Los IDs son los IDs internos de Odysseia, no nombres visibles ni comandos.
+      # Los IDs son los IDs internos de DrakesBosses, no nombres visibles ni comandos.
       matching-pantheon-bonus: 1.35
       affinities:
         thor: NORDIC

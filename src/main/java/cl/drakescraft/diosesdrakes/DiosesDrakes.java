@@ -5,6 +5,7 @@ import cl.drakescraft.diosesdrakes.api.DivineAccess;
 import cl.drakescraft.diosesdrakes.api.DiosesDrakesAccess;
 import cl.drakescraft.diosesdrakes.menu.PantheonMenuListener;
 import cl.drakescraft.diosesdrakes.listener.HephaestusListener;
+import cl.drakescraft.diosesdrakes.listener.BossVictoryListener;
 import cl.drakescraft.diosesdrakes.service.DivineAuditLogger;
 import cl.drakescraft.diosesdrakes.service.DivineTransactionService;
 import cl.drakescraft.diosesdrakes.service.ProfileService;
@@ -76,6 +77,7 @@ public final class DiosesDrakes extends JavaPlugin {
         getServer().getPluginManager().registerEvents(cacheManager, this);
         getServer().getPluginManager().registerEvents(new PantheonMenuListener(profiles, skills, transactions), this);
         getServer().getPluginManager().registerEvents(new HephaestusListener(skills), this);
+        getServer().getPluginManager().registerEvents(new BossVictoryListener(bossFavor), this);
         getServer().getPluginManager().registerEvents(pvpSafety, this);
         getServer().getPluginManager().registerEvents(abilities, this);
         getServer().getPluginManager().registerEvents(abilities.cinematics(), this);
@@ -128,25 +130,28 @@ public final class DiosesDrakes extends JavaPlugin {
                     getConfig().getInt("convergence.anchors.max", 3),
                     getConfig().getInt("convergence.anchors.minimum-offering", 25),
                     getConfig().getInt("convergence.anchors.dominance-margin", 250));
+            String bossRewardsPath = getConfig().isConfigurationSection("integrations.drakesbosses.boss-rewards")
+                    ? "integrations.drakesbosses.boss-rewards"
+                    : "integrations.odysseia.boss-rewards";
             bossFavor = new BossFavorService(repository,
-                    getConfig().getBoolean("integrations.odysseia.boss-rewards.enabled", true),
-                    getConfig().getInt("integrations.odysseia.boss-rewards.base-favor", 60),
-                    getConfig().getInt("integrations.odysseia.boss-rewards.minimum-favor", 15),
-                    getConfig().getInt("integrations.odysseia.boss-rewards.maximum-favor", 300),
-                    getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.multipliers") == null
+                    getConfig().getBoolean(bossRewardsPath + ".enabled", true),
+                    getConfig().getInt(bossRewardsPath + ".base-favor", 60),
+                    getConfig().getInt(bossRewardsPath + ".minimum-favor", 15),
+                    getConfig().getInt(bossRewardsPath + ".maximum-favor", 300),
+                    getConfig().getConfigurationSection(bossRewardsPath + ".multipliers") == null
                             ? Map.of()
-                            : getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.multipliers").getKeys(false).stream()
+                            : getConfig().getConfigurationSection(bossRewardsPath + ".multipliers").getKeys(false).stream()
                             .collect(java.util.stream.Collectors.toUnmodifiableMap(
                                     key -> key.toLowerCase(Locale.ROOT),
-                                    key -> getConfig().getDouble("integrations.odysseia.boss-rewards.multipliers." + key, 1.0D))),
-                    getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.affinities") == null
+                                    key -> getConfig().getDouble(bossRewardsPath + ".multipliers." + key, 1.0D))),
+                    getConfig().getConfigurationSection(bossRewardsPath + ".affinities") == null
                             ? Map.of()
-                            : getConfig().getConfigurationSection("integrations.odysseia.boss-rewards.affinities").getKeys(false).stream()
+                            : getConfig().getConfigurationSection(bossRewardsPath + ".affinities").getKeys(false).stream()
                             .map(key -> Map.entry(key.toLowerCase(Locale.ROOT), PantheonId.fromStorage(
-                                    getConfig().getString("integrations.odysseia.boss-rewards.affinities." + key)).orElse(null)))
+                                    getConfig().getString(bossRewardsPath + ".affinities." + key)).orElse(null)))
                             .filter(entry -> entry.getValue() != null)
                             .collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue)),
-                    getConfig().getDouble("integrations.odysseia.boss-rewards.matching-pantheon-bonus", 1.35D));
+                    getConfig().getDouble(bossRewardsPath + ".matching-pantheon-bonus", 1.35D));
         } catch (SQLException | java.io.IOException exception) {
             getLogger().severe("No se pudo iniciar la persistencia divina: " + exception.getMessage());
             return false;
