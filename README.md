@@ -4,6 +4,20 @@
 
 # DiosesDrakes
 
+## Scope at a glance
+
+DiosesDrakes is the persistent divine-progression authority for DrakesCraft.
+It owns UUID profiles, pantheon and patron selection, favor, skills, loadouts,
+cooldowns, upkeep, Convergence, passive blessings and auditable divine
+transactions. It does not own boss spawning, arena rewards, Tebex purchases or
+Arcana elemental profiles.
+
+The plugin exposes `DivineAccess` through Bukkit `ServicesManager`, allowing
+DrakesBosses and ArcanaDrakes to consume divine context without sharing its
+SQLite schema. Boss victories are idempotent, favor is bounded by configured
+minimum/maximum values, and matching-pantheon victories can receive a
+configurable bonus.
+
 **The persistent divine-progression system for DrakesCraft on Paper/Purpur 1.21.11.** Players choose a pantheon and patron, unlock an intentional loadout of blessings, earn favor through approved boss content, and take part in the permanent Convergence anchors.
 
 ## Start here
