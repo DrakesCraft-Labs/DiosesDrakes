@@ -5,3 +5,6 @@ target/
 .vscode/
 *.iml
 run/
+
+build/
+.gradle/
