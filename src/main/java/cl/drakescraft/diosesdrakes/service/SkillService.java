@@ -141,6 +141,18 @@ public final class SkillService {
     }
 
     public ActivationResult tryActivate(UUID playerId, String skillId, Instant now) {
+        return tryActivate(playerId, skillId, now, 1.0D);
+    }
+
+    /**
+     * Activa una habilidad estirando su enfriamiento por un factor.
+     *
+     * El factor existe para el combate contra jugadores: usar una bendicion en mitad de una pelea
+     * la deja enfriando mas tiempo del normal. Sin eso, una habilidad de curacion se convierte en
+     * un boton de reinicio y la pelea no termina nunca; con eso, gastarla es una decision que se
+     * paga despues.
+     */
+    public ActivationResult tryActivate(UUID playerId, String skillId, Instant now, double factorCooldown) {
         SkillDefinition skill = definition(skillId);
         if (!isEquippedAndUsable(playerId, skillId)) {
             return ActivationResult.denied("La habilidad no esta equipada o disponible.");
@@ -148,7 +160,8 @@ public final class SkillService {
         if (skill.cooldownSeconds() <= 0) {
             return ActivationResult.denied("Esta bendicion es pasiva.");
         }
-        Duration cooldown = Duration.ofSeconds(skill.cooldownSeconds());
+        long segundos = Math.max(1L, Math.round(skill.cooldownSeconds() * Math.max(1.0D, factorCooldown)));
+        Duration cooldown = Duration.ofSeconds(segundos);
         if (!cooldowns.tryStart(playerId, skill.id(), cooldown, now)) {
             long seconds = Math.max(1, cooldowns.remaining(playerId, skill.id(), now).toSeconds());
             return ActivationResult.denied("Cooldown activo: " + seconds + "s.");

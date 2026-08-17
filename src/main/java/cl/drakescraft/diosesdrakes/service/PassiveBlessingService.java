@@ -8,22 +8,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.time.Instant;
 
-/** Refreshes short, self-only passive effects; unequipping naturally lets them expire. */
+/**
+ * Refreshes short, self-only passive effects; unequipping naturally lets them expire.
+ *
+ * Este refresco no se detiene durante el combate contra jugadores. Antes si lo hacia, y como el
+ * efecto que reparte dura ocho segundos, el resultado practico era que a los ocho segundos de
+ * empezar una pelea se le caian al jugador todas las bendiciones pasivas que tenia equipadas.
+ * Es decir, el panteon quitaba poderes justo cuando hacian falta, y por eso nadie lo llevaba a
+ * una pelea.
+ */
 public final class PassiveBlessingService {
     private final SkillService skills;
-    private final PvpSafetyGate pvp;
 
-    public PassiveBlessingService(SkillService skills, PvpSafetyGate pvp) {
+    public PassiveBlessingService(SkillService skills) {
         this.skills = skills;
-        this.pvp = pvp;
     }
 
     public void refresh(Player player) {
-        if (pvp.inCombat(player, Instant.now())) {
-            return;
-        }
         for (SkillDefinition skill : skills.equippedUsable(player.getUniqueId())) {
             if (skill.type() == SkillType.PASSIVE && skill.god() != GodId.HEPHAESTUS) {
                 apply(player, skill);

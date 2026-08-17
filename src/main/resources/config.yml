@@ -20,7 +20,13 @@ renunciation:
   cooldown-hours: 48
   confirmation-required: true
 pvp:
-  survival-powers-enabled: false
+  # Si las bendiciones siguen funcionando mientras hay combate contra otro jugador.
+  # En false el panteon se apaga en cuanto empieza una pelea, que es lo que hacia que
+  # nadie lo llevase a una: quitaba poderes justo cuando hacian falta.
+  survival-powers-enabled: true
+  # Cuanto se estira el enfriamiento de una bendicion usada en mitad del combate.
+  # Evita que una habilidad de curacion sea un boton de reinicio y la pelea no acabe nunca.
+  cooldown-multiplier: 2.0
   divine-arena:
     enabled: false
     region-id: pvpdivino

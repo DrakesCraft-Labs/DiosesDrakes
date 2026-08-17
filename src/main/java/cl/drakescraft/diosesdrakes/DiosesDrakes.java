@@ -206,7 +206,7 @@ public final class DiosesDrakes extends JavaPlugin {
         );
         pvpSafety = new PvpSafetyGate();
         abilities = new GenericDivineAbilityService(this, skills, hephaestus, pvpSafety, protectionGate);
-        passives = new PassiveBlessingService(skills, pvpSafety);
+        passives = new PassiveBlessingService(skills);
         if (transactionService == null) {
             getLogger().warning("Economia divina desactivada: los desbloqueos de pago y mantenimiento no se habilitaran.");
         }

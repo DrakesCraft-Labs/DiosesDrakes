@@ -183,9 +183,6 @@ public final class GenericDivineAbilityService implements Listener {
         if (skill.type() == SkillType.PASSIVE) {
             return audited(player, skillId, UseResult.denied("Esta bendicion es pasiva; equipala para mantenerla activa."));
         }
-        if (pvp.inCombat(player, Instant.now())) {
-            return audited(player, skillId, UseResult.denied("Las bendiciones de supervivencia se bloquean durante combate PvP."));
-        }
         String combatRequirement = combatRequirement(player, skill);
         if (combatRequirement != null) {
             return audited(player, skillId, UseResult.denied(combatRequirement));
@@ -194,13 +191,31 @@ public final class GenericDivineAbilityService implements Listener {
             return audited(player, skillId, UseResult.denied("No hay una criatura hostil accesible fuera de una proteccion ajena."));
         }
 
-        SkillService.ActivationResult activation = skills.tryActivate(player.getUniqueId(), skill.id(), Instant.now());
+        // En combate la bendicion sigue estando disponible, pero enfria mas tiempo. Antes se
+        // denegaba directamente, de modo que entrar en PvP dejaba al jugador sin nada de lo que
+        // habia desbloqueado: el panteon penalizaba pelear en vez de intervenir en la pelea.
+        //
+        // survival-powers-enabled ya existia en config.yml pero no la leia nadie, asi que ponerla
+        // en true no hacia nada. Ahora es el interruptor real de todo esto.
+        boolean enCombate = pvp.inCombat(player, Instant.now());
+        if (enCombate && !plugin.getConfig().getBoolean("pvp.survival-powers-enabled", true)) {
+            return audited(player, skillId,
+                    UseResult.denied("Las bendiciones estan desactivadas durante combate PvP."));
+        }
+        double factor = enCombate
+                ? plugin.getConfig().getDouble("pvp.cooldown-multiplier", 2.0D)
+                : 1.0D;
+
+        SkillService.ActivationResult activation =
+                skills.tryActivate(player.getUniqueId(), skill.id(), Instant.now(), factor);
         if (!activation.started()) {
             return audited(player, skillId, UseResult.denied(activation.message()));
         }
         apply(player, skill, Math.max(1, activation.durationSeconds()));
         announceActivation(player, skill, activation.durationSeconds());
-        return audited(player, skillId, UseResult.started(skill.name() + " activo durante " + activation.durationSeconds() + " segundos."));
+        String aviso = enCombate ? " Enfriamiento extendido por combate." : "";
+        return audited(player, skillId, UseResult.started(
+                skill.name() + " activo durante " + activation.durationSeconds() + " segundos." + aviso));
     }
 
     private UseResult audited(Player player, String skillId, UseResult result) {
