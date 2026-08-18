@@ -18,7 +18,10 @@
   <rect x="2" y="2" width="916" height="236" rx="14" fill="none" stroke="url(#acG)" stroke-width="2" opacity="0.4"/>
   
   <g transform="translate(460,70) scale(1.6)">
-<circle cx="0" cy="0" r="28" fill="none" stroke="url(#acG)" stroke-width="4"/><path d="M0,-24 L6,-6 L24,0 L6,6 L0,24 L-6,6 L-24,0 L-6,-6 Z" fill="#F59E0B"/><circle cx="0" cy="0" r="6" fill="#FDE68A"/>
+
+    <circle cx="0" cy="0" r="28" fill="none" stroke="url(#acG)" stroke-width="4"/>
+    <path d="M0,-24 L6,-6 L24,0 L6,6 L0,24 L-6,6 L-24,0 L-6,-6 Z" fill="#F59E0B"/>
+    <circle cx="0" cy="0" r="6" fill="#FDE68A"/>
   </g>
   
   <text x="460" y="152" text-anchor="middle" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" fill="#F8FAFC" letter-spacing="2">
