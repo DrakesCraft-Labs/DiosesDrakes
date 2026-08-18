@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./diosesdrakes_banner.svg" width="100%" alt="DiosesDrakes banner" />
+  <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/DiosesDrakes/main/banner.svg" width="100%" alt="DiosesDrakes banner" />
 </p>
 
 # DiosesDrakes

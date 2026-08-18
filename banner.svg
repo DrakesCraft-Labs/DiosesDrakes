@@ -1,63 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 300" width="920" height="300">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" width="920" height="240" role="img" aria-label="DiosesDrakes Banner">
   <defs>
-    <linearGradient id="diosesBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E0A24" />
-      <stop offset="50%" stop-color="#3B0764" />
-      <stop offset="100%" stop-color="#0F0318" />
+    <linearGradient id="bFondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070B14"/>
+      <stop offset="100%" stop-color="#0F172A"/>
     </linearGradient>
-
-    <linearGradient id="divinePurple" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#C084FC" />
-      <stop offset="50%" stop-color="#E879F9" />
-      <stop offset="100%" stop-color="#F472B6" />
+    <linearGradient id="acG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#FDE68A"/>
     </linearGradient>
-
-    <filter id="diosesGlow">
-      <feGaussianBlur stdDeviation="6" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
+    <radialGradient id="bHalo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-
-  <style>
-    @keyframes diosesPulse {
-      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 15px rgba(192, 132, 252, 0.7)); }
-      50% { opacity: 1; filter: drop-shadow(0 0 30px rgba(244, 114, 182, 1)); }
-    }
-    @keyframes starFlow {
-      0% { stroke-dashoffset: 200; }
-      100% { stroke-dashoffset: 0; }
-    }
-
-    .bg-dioses { fill: url(#diosesBg); }
-    .title-dioses { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 44px; fill: url(#divinePurple); animation: diosesPulse 3.5s infinite ease-in-out; }
-    .sub-dioses { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; fill: #F472B6; letter-spacing: 3px; }
-    .wire-dioses { stroke: url(#divinePurple); stroke-width: 2; fill: none; stroke-dasharray: 14 7; animation: starFlow 14s linear infinite; opacity: 0.5; }
-    .badge-dioses { fill: #3B0764; stroke: #C084FC; stroke-width: 1.5; rx: 6px; }
-    .btext-dioses { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #E879F9; }
-  </style>
-
-  <rect class="bg-dioses" width="920" height="300" rx="14" stroke="#C084FC" stroke-width="1.5" />
-  <path class="wire-dioses" d="M 50,40 H 870 M 50,260 H 870 M 100,0 V 300 M 820,0 V 300 M 50,150 H 870" />
-
-  <g transform="translate(460, 95)">
-    <polygon points="0,-42 34,-20 34,20 0,42 -34,20 -34,-20" fill="#3B0764" stroke="url(#divinePurple)" stroke-width="3" filter="url(#diosesGlow)" />
-    <circle cx="0" cy="0" r="10" fill="#E879F9" />
+  <rect width="920" height="240" rx="16" fill="url(#bFondo)"/>
+  <rect width="920" height="240" rx="16" fill="url(#bHalo)"/>
+  <rect x="2" y="2" width="916" height="236" rx="14" fill="none" stroke="url(#acG)" stroke-width="2" opacity="0.4"/>
+  
+  <g transform="translate(460,70) scale(1.6)">
+<circle cx="0" cy="0" r="28" fill="none" stroke="url(#acG)" stroke-width="4"/><path d="M0,-24 L6,-6 L24,0 L6,6 L0,24 L-6,6 L-24,0 L-6,-6 Z" fill="#F59E0B"/><circle cx="0" cy="0" r="6" fill="#FDE68A"/>
   </g>
-
-  <text x="460" y="185" text-anchor="middle" class="title-dioses">DIOSES DRAKES</text>
-  <text x="460" y="215" text-anchor="middle" class="sub-dioses">MYTHICAL PANTHEON, ALTARS &amp; FAVOR SYSTEM · RUST FFM ENGINE</text>
-
-  <g transform="translate(230, 245)">
-    <rect x="0" y="0" width="145" height="30" class="badge-dioses" />
-    <text x="12" y="20" class="btext-dioses">GODS PANTHEON</text>
-
-    <rect x="165" y="0" width="150" height="30" class="badge-dioses" stroke="#FF4500" />
-    <text x="177" y="20" class="btext-dioses" fill="#FF7300">RUST FFM HYBRID</text>
-
-    <rect x="335" y="0" width="135" height="30" class="badge-dioses" stroke="#00FF66" />
-    <text x="347" y="20" class="btext-dioses" fill="#00FF66">PAPER 1.21.11</text>
+  
+  <text x="460" y="152" text-anchor="middle" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" fill="#F8FAFC" letter-spacing="2">
+    DIOSESDRAKES
+  </text>
+  <text x="460" y="184" text-anchor="middle" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#FDE68A" letter-spacing="3" opacity="0.9">
+    PANTEÓN DIVINO · PODERES ANCESTRALES · TEMPLOS
+  </text>
+  
+  <g transform="translate(460, 210)">
+    <rect x="-180" y="-12" width="110" height="20" rx="4" fill="#1E293B" stroke="#F59E0B" stroke-width="1"/>
+    <text x="-125" y="2" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#E2E8F0">DRAKES LABS</text>
+    
+    <rect x="-55" y="-12" width="110" height="20" rx="4" fill="#1E293B" stroke="#FDE68A" stroke-width="1"/>
+    <text x="0" y="2" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#E2E8F0">PAPER 1.21.11</text>
+    
+    <rect x="70" y="-12" width="110" height="20" rx="4" fill="#1E293B" stroke="#F59E0B" stroke-width="1"/>
+    <text x="125" y="2" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#E2E8F0">JAVA 21</text>
   </g>
 </svg>
