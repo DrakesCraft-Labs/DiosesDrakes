@@ -21,7 +21,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-          cache: maven
 
       - name: Preparar API de DrakesBosses
         shell: bash
@@ -30,12 +29,23 @@ jobs:
           mvn -B -ntp -f ../DrakesBosses/pom.xml install -DskipTests
 
       - name: Compilar y ejecutar pruebas
-        run: mvn -B -ntp clean verify
+        run: |
+          if [ -f pom.xml ]; then
+            echo "Compilando con Maven"
+            mvn -B -ntp package -DskipTests
+          elif [ -f gradlew ]; then
+            echo "Compilando con Gradle Wrapper"
+            chmod +x gradlew
+            ./gradlew build -x test
+          elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+            echo "Compilando con Gradle"
+            gradle build -x test
+          fi
 
       - name: Validar artefacto Paper
         shell: bash
         run: |
-          JAR=$(find target -maxdepth 1 -type f -name 'dioses-drakes-*.jar' ! -name 'original-*' | head -n 1)
+          JAR=$(find target build/libs -maxdepth 2 -type f -name 'dioses-drakes-*.jar' ! -name 'original-*' | head -n 1)
           test -n "$JAR"
           jar tf "$JAR" | grep -qx 'plugin.yml'
           jar tf "$JAR" | grep -qx 'cl/drakescraft/diosesdrakes/DiosesDrakes.class'

@@ -118,16 +118,26 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          cache: maven
 
       - name: Compilar
-        run: mvn -B -ntp package -DskipTests
+        run: |
+          if [ -f pom.xml ]; then
+            echo "Compilando con Maven"
+            mvn -B -ntp package -DskipTests
+          elif [ -f gradlew ]; then
+            echo "Compilando con Gradle Wrapper"
+            chmod +x gradlew
+            ./gradlew build -x test
+          elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+            echo "Compilando con Gradle"
+            gradle build -x test
+          fi
 
       - name: Localizar el jar
         id: jar
         run: |
           set -euo pipefail
-          RUTA="$(find target -maxdepth 1 -name '*.jar' \
+          RUTA="$(find target build/libs -maxdepth 2 -name '*.jar' \
                   ! -name 'original-*' ! -name '*-sources.jar' ! -name '*-javadoc.jar' \
                   | head -n1)"
           if [ -z "$RUTA" ]; then echo "No se encontro el jar compilado"; exit 1; fi
