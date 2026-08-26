@@ -7,12 +7,12 @@ import cl.drakescraft.diosesdrakes.storage.DivineRepository;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public final class ProfileService {
-    private static final ZoneId ZONA_CLT = ZoneId.of("America/Santiago");
+    private static final ZoneOffset ZONA_CLT = ZoneOffset.ofHours(-4);
     private static final DateTimeFormatter FORMATO_CLT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZONA_CLT);
 
