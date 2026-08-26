@@ -29,4 +29,12 @@ public record DivineProfile(
     public boolean canRenounce(Instant now) {
         return activeGod != null && (renounceAvailableAt == null || !now.isBefore(renounceAvailableAt));
     }
+
+    /** Cooldown restante antes de {@code renounceAvailableAt}, o cero si ya paso o no aplica. */
+    public java.time.Duration cooldownRemaining(Instant now) {
+        if (renounceAvailableAt == null || !now.isBefore(renounceAvailableAt)) {
+            return java.time.Duration.ZERO;
+        }
+        return java.time.Duration.between(now, renounceAvailableAt);
+    }
 }

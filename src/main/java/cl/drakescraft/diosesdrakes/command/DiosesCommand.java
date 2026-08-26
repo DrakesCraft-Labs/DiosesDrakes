@@ -250,7 +250,7 @@ public final class DiosesCommand implements CommandExecutor, TabCompleter {
             try {
                 DivineProfile profile = profiles.renounce(player.getUniqueId(), Instant.now());
                 runSync(() -> player.sendMessage("Renunciaste a tu dios. El panteon estara disponible nuevamente desde "
-                        + profile.renounceAvailableAt() + "."));
+                        + ProfileService.formatClt(profile.renounceAvailableAt()) + "."));
             } catch (IllegalStateException exception) {
                 runSync(() -> player.sendMessage(exception.getMessage()));
             } catch (Exception exception) {
