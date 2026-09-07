@@ -31,7 +31,7 @@ class ProfileServiceTest {
     }
 
     @Test
-    void selectGodMessageReportsSubMinuteRemainingAsZero() throws Exception {
+    void selectGodMessageNeverAnnouncesZeroWhileCooldownIsActive() throws Exception {
         UUID playerId = UUID.randomUUID();
         Instant now = Instant.parse("2026-07-16T18:00:00Z");
 
@@ -43,7 +43,7 @@ class ProfileServiceTest {
             Instant justBeforeCooldownEnds = now.plusSeconds(172800).minusSeconds(30);
             IllegalStateException exception = assertThrows(IllegalStateException.class,
                     () -> service.selectGod(playerId, GodId.HEPHAESTUS, justBeforeCooldownEnds));
-            assertTrue(exception.getMessage().contains("en 0h 0m"), exception.getMessage());
+            assertTrue(exception.getMessage().contains("en 0h 1m"), exception.getMessage());
         }
     }
 

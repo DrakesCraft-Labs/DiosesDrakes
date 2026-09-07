@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public final class ProfileService {
@@ -63,7 +64,9 @@ public final class ProfileService {
     }
 
     private static String describeRemaining(DivineProfile profile, Instant now) {
-        Duration remaining = profile.cooldownRemaining(now);
+        // Se redondea al minuto superior: anunciar "0h 0m" con el cooldown aun vigente hace
+        // creer al jugador que ya puede elegir y reabre el reporte del ticket 45.
+        Duration remaining = profile.cooldownRemaining(now).plusSeconds(59).truncatedTo(ChronoUnit.MINUTES);
         long horas = remaining.toHours();
         long minutos = remaining.toMinutesPart();
         return "en " + horas + "h " + minutos + "m (" + FORMATO_CLT.format(profile.renounceAvailableAt()) + " CLT)";
