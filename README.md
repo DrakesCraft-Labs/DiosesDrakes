@@ -185,12 +185,10 @@ Back up the current JAR, config and `diosesdrakes.db` before deployment. Replace
 
 Created for DrakesCraft by **JackStar**.
 
-## ⚖️ Upstream Attribution & License / Licencia y Créditos
+---
 
-- **Original Project / Upstream**: Slimefun4 Community Addon.
-- **Port & Maintenance**: DrakesCraft Labs team (Compatibility for Paper / Purpur 1.21.11).
-- **License**: GPL-3.0 / MIT.
-- **Source Code**: [GitHub Repository](https://github.com/DrakesCraft-Labs/DiosesDrakes)
-- **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/DiosesDrakes/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
+## 📄 License & Intellectual Property
 
-*This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets and concepts belong to their respective creators.*
+Copyright © 2026 [**JackStar6677-1**](https://github.com/JackStar6677-1) · [**DrakesCraft Labs**](https://github.com/DrakesCraft-Labs). All Rights Reserved.
+
+This software is **Source-Available** for public inspection and technical audit. Redistribution, commercial repackaging, or unauthorized derivative distribution without explicit written permission from the author is strictly prohibited.
