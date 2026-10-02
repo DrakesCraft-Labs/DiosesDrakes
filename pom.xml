@@ -10,12 +10,17 @@
     <description>Divine progression and economy sinks for DrakesCraft.</description>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
+        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <repositories>
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>drakescraft-labs-maven</id>
+            <url>https://maven.drakescraft.cl/</url>
         </repository>
         <repository>
             <id>jitpack</id>
@@ -26,7 +31,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
